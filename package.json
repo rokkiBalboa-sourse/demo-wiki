@@ -1,0 +1,19 @@
+{
+  "name": "wiki-site",
+  "version": "1.0.0",
+  "description": "Modern documentation wiki site powered by VitePress",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview",
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "decap-server": "^3.11.2",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.43"
+  }
+}
