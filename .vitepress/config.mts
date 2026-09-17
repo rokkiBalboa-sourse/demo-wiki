@@ -46,7 +46,8 @@ export default defineConfig({
       { text: 'Главная', link: '/' },
       { text: 'Документация', link: '/guide/getting-started' },
       { text: 'База знаний', link: '/kb/overview' },
-      { text: 'FAQ', link: '/faq' }
+      { text: 'FAQ', link: '/faq' },
+      { text: 'Админка', link: '/admin/index.html', target: '_blank' }
     ],
 
     sidebar: {

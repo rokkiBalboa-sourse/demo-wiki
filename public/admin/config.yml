@@ -1,0 +1,49 @@
+local_backend: true
+
+backend:
+  name: git-gateway
+  branch: main
+
+locale: 'ru'
+
+media_folder: 'public/images'
+public_folder: '/images'
+
+collections:
+  - name: 'guide'
+    label: 'Документация (Guide)'
+    folder: 'guide'
+    create: true
+    slug: '{{slug}}'
+    extension: 'md'
+    format: 'frontmatter'
+    fields:
+      - { label: 'Заголовок', name: 'title', widget: 'string', required: false }
+      - { label: 'Содержимое', name: 'body', widget: 'markdown' }
+
+  - name: 'kb'
+    label: 'База знаний (KB)'
+    folder: 'kb'
+    create: true
+    slug: '{{slug}}'
+    extension: 'md'
+    format: 'frontmatter'
+    fields:
+      - { label: 'Заголовок', name: 'title', widget: 'string', required: false }
+      - { label: 'Содержимое', name: 'body', widget: 'markdown' }
+
+  - name: 'pages'
+    label: 'Основные страницы'
+    files:
+      - label: 'Главная страница (index.md)'
+        name: 'home'
+        file: 'index.md'
+        fields:
+          - { label: 'Макет', name: 'layout', widget: 'hidden', default: 'home' }
+          - { label: 'Содержимое', name: 'body', widget: 'markdown', required: false }
+      - label: 'FAQ (faq.md)'
+        name: 'faq'
+        file: 'faq.md'
+        fields:
+          - { label: 'Заголовок', name: 'title', widget: 'string', required: false }
+          - { label: 'Содержимое', name: 'body', widget: 'markdown' }

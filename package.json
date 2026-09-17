@@ -8,10 +8,13 @@
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",
     "dev": "vitepress dev",
+    "cms": "decap-server",
+    "dev:all": "concurrently \"vitepress dev\" \"decap-server\"",
     "build": "vitepress build",
     "preview": "vitepress preview"
   },
   "devDependencies": {
+    "concurrently": "^10.0.5",
     "decap-server": "^3.11.2",
     "vitepress": "^1.6.4",
     "vue": "^3.5.43"
