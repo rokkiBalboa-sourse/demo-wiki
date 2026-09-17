@@ -17,8 +17,9 @@ collections:
     slug: '{{slug}}'
     extension: 'md'
     format: 'frontmatter'
+    summary: '{{title}}'
     fields:
-      - { label: 'Заголовок', name: 'title', widget: 'string', required: false }
+      - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
   - name: 'kb'
@@ -28,8 +29,9 @@ collections:
     slug: '{{slug}}'
     extension: 'md'
     format: 'frontmatter'
+    summary: '{{title}}'
     fields:
-      - { label: 'Заголовок', name: 'title', widget: 'string', required: false }
+      - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
   - name: 'pages'

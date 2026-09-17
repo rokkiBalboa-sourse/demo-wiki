@@ -1,3 +1,7 @@
+---
+title: Конфигурация VitePress
+---
+
 # Конфигурация VitePress
 
 Вся конфигурация проекта хранится в файле [`.vitepress/config.mts`](file:///.vitepress/config.mts).
