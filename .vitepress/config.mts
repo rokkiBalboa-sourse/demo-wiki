@@ -44,6 +44,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Главная', link: '/' },
+      { text: 'Модуль 1', link: '/module1/task-1' },
       { text: 'Документация', link: '/guide/getting-started' },
       { text: 'База знаний', link: '/kb/overview' },
       { text: 'FAQ', link: '/faq' },
@@ -88,6 +89,15 @@ export default defineConfig({
           text: 'Частые вопросы',
           items: [
             { text: 'Общие вопросы (FAQ)', link: '/faq' }
+          ]
+        }
+      ],
+      '/module1/': [
+        {
+          text: 'Модуль №1',
+          collapsed: false,
+          items: [
+            { text: 'Задание 1: Сеть и хосты', link: '/module1/task-1' }
           ]
         }
       ]

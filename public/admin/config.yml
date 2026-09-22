@@ -34,6 +34,18 @@ collections:
       - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
+  - name: 'module1'
+    label: 'Модуль 1'
+    folder: 'module1'
+    create: true
+    slug: '{{slug}}'
+    extension: 'md'
+    format: 'frontmatter'
+    summary: '{{title}}'
+    fields:
+      - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+      - { label: 'Содержимое', name: 'body', widget: 'markdown' }
+
   - name: 'pages'
     label: 'Основные страницы'
     files:
