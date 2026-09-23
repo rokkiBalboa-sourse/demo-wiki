@@ -100,7 +100,8 @@ export default defineConfig({
             { text: 'Задание 3: Пользователи и sudo', link: '/module1/task-3' },
             { text: 'Задание 4: Коммутация и VLAN (Proxmox)', link: '/module1/task-4' },
             { text: 'Задание 5: Безопасный SSH', link: '/module1/task-5' },
-            { text: 'Задание 6: IP-туннель (GRE)', link: '/module1/task-6' }
+            { text: 'Задание 6: IP-туннель (GRE)', link: '/module1/task-6' },
+            { text: 'Задание 7: Маршрутизация OSPF (FRR)', link: '/module1/task-7' }
           ]
         }
       ]
