@@ -103,7 +103,8 @@ export default defineConfig({
             { text: 'Задание 6: IP-туннель (GRE)', link: '/module1/task-6' },
             { text: 'Задание 7: Маршрутизация OSPF (FRR)', link: '/module1/task-7' },
             { text: 'Задание 8: Трансляция адресов (NAT)', link: '/module1/task-8' },
-            { text: 'Задание 9: Сервер DHCP (dnsmasq)', link: '/module1/task-9' }
+            { text: 'Задание 9: Сервер DHCP (dnsmasq)', link: '/module1/task-9' },
+            { text: 'Задание 10: Служба DNS (BIND 9)', link: '/module1/task-10' }
           ]
         }
       ]
