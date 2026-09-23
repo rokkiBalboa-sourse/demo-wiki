@@ -104,7 +104,8 @@ export default defineConfig({
             { text: 'Задание 7: Маршрутизация OSPF (FRR)', link: '/module1/task-7' },
             { text: 'Задание 8: Трансляция адресов (NAT)', link: '/module1/task-8' },
             { text: 'Задание 9: Сервер DHCP (dnsmasq)', link: '/module1/task-9' },
-            { text: 'Задание 10: Служба DNS (BIND 9)', link: '/module1/task-10' }
+            { text: 'Задание 10: Служба DNS (BIND 9)', link: '/module1/task-10' },
+            { text: 'Задание 11: Часовой пояс (timedatectl)', link: '/module1/task-11' }
           ]
         }
       ]
