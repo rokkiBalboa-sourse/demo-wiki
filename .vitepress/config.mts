@@ -97,7 +97,8 @@ export default defineConfig({
             { text: 'Задание Модуля №1', link: '/module1/' },
             { text: 'Задание 1: Сеть и хосты', link: '/module1/task-1' },
             { text: 'Задание 2: Доступ в Интернет (ISP)', link: '/module1/task-2' },
-            { text: 'Задание 3: Пользователи и sudo', link: '/module1/task-3' }
+            { text: 'Задание 3: Пользователи и sudo', link: '/module1/task-3' },
+            { text: 'Задание 4: Коммутация и VLAN (Proxmox)', link: '/module1/task-4' }
           ]
         }
       ]
