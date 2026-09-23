@@ -102,7 +102,8 @@ export default defineConfig({
             { text: 'Задание 5: Безопасный SSH', link: '/module1/task-5' },
             { text: 'Задание 6: IP-туннель (GRE)', link: '/module1/task-6' },
             { text: 'Задание 7: Маршрутизация OSPF (FRR)', link: '/module1/task-7' },
-            { text: 'Задание 8: Трансляция адресов (NAT)', link: '/module1/task-8' }
+            { text: 'Задание 8: Трансляция адресов (NAT)', link: '/module1/task-8' },
+            { text: 'Задание 9: Сервер DHCP (dnsmasq)', link: '/module1/task-9' }
           ]
         }
       ]
