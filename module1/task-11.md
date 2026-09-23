@@ -111,39 +111,5 @@ System clock synchronized: yes
 
 ---
 
-## 3. Быстрая проверка через стандартные утилиты
-
-Для подтверждения можно также выполнить:
-
-```bash
-date
-```
-Вывод:
-```text
-Wed Sep 23 18:15:30 +07 2026
-```
-
-И убедиться, что симлинк указывает на правильный файл зоны:
-```bash
-ls -l /etc/localtime
-```
-Вывод:
-```text
-lrwxrwxrwx 1 root root 38 Sep 23 18:15 /etc/localtime -> ../usr/share/zoneinfo/Asia/Novosibirsk
-```
-
----
-
-## 4. Сводная таблица параметров для всех узлов
-
-| Узел | FQDN | Часовой пояс | Команда |
-| :--- | :--- | :--- | :--- |
-| **ISP** | `isp.au-team.irpo` | `Asia/Novosibirsk` (UTC+7) | `timedatectl set-timezone Asia/Novosibirsk` |
-| **HQ-RTR** | `hq-rtr.au-team.irpo` | `Asia/Novosibirsk` (UTC+7) | `timedatectl set-timezone Asia/Novosibirsk` |
-| **BR-RTR** | `br-rtr.au-team.irpo` | `Asia/Novosibirsk` (UTC+7) | `timedatectl set-timezone Asia/Novosibirsk` |
-| **HQ-SRV** | `hq-srv.au-team.irpo` | `Asia/Novosibirsk` (UTC+7) | `timedatectl set-timezone Asia/Novosibirsk` |
-| **BR-SRV** | `br-srv.au-team.irpo` | `Asia/Novosibirsk` (UTC+7) | `timedatectl set-timezone Asia/Novosibirsk` |
-| **HQ-CLI** | `hq-cli.au-team.irpo` | `Asia/Novosibirsk` (UTC+7) | `timedatectl set-timezone Asia/Novosibirsk` |
-
 > [!NOTE] Итог выполнения Модуля №1
 > После выполнения задания №11 настройка всех ключевых сетевых и базовых системных служб Модуля №1 полностью завершена!
