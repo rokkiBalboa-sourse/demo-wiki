@@ -35,8 +35,20 @@ collections:
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
   - name: 'module1'
-    label: 'Модуль 1'
+    label: 'Модуль 1 | 2026'
     folder: 'module1'
+    create: true
+    slug: '{{slug}}'
+    extension: 'md'
+    format: 'frontmatter'
+    summary: '{{title}}'
+    fields:
+      - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+      - { label: 'Содержимое', name: 'body', widget: 'markdown' }
+
+  - name: 'module2'
+    label: 'Модуль 2 | 2026'
+    folder: 'module2'
     create: true
     slug: '{{slug}}'
     extension: 'md'

@@ -45,6 +45,7 @@ export default defineConfig({
     nav: [
       { text: 'Главная', link: '/' },
       { text: 'Модуль 1', link: '/module1/' },
+      { text: 'Модуль 2', link: '/module2/' },
       { text: 'Админка', link: '/admin/index.html', target: '_blank' }
     ],
 
@@ -106,6 +107,15 @@ export default defineConfig({
             { text: 'Задание 9: Сервер DHCP (dnsmasq)', link: '/module1/task-9' },
             { text: 'Задание 10: Служба DNS (BIND 9)', link: '/module1/task-10' },
             { text: 'Задание 11: Часовой пояс (timedatectl)', link: '/module1/task-11' }
+          ]
+        }
+      ],
+      '/module2/': [
+        {
+          text: 'Модуль №2',
+          collapsed: false,
+          items: [
+            { text: 'Задание Модуля №2', link: '/module2/' }
           ]
         }
       ]
