@@ -38,15 +38,15 @@ description: "Пошаговая настройка NAT Masquerade с помощ
 Выполните команды под пользователем `root` на машине **HQ-RTR**:
 
 ```bash
-# 1. Устанавливаем пакеты межсетевого экрана nftables и редактор nano:
-apt-get install nftables nano -y
+# 1. Устанавливаем пакет межсетевого экрана nftables:
+apt-get install nftables -y
 ```
 
 Создаём конфигурационный файл правил трансляции:
 
 ```bash
 # 2. Открываем файл правил nftables:
-nano /etc/nftables/nftables.nft
+vim /etc/nftables/nftables.nft
 ```
 
 ::: tip Внимание к содержимому файла
@@ -91,10 +91,10 @@ systemctl restart nftables.service
 
 ```bash
 # 1. Устанавливаем nftables:
-apt-get install nftables nano -y
+apt-get install nftables -y
 
 # 2. Открываем файл конфигурации:
-nano /etc/nftables/nftables.nft
+vim /etc/nftables/nftables.nft
 ```
 
 Вставляем правило NAT Masquerade:

@@ -52,7 +52,7 @@ apt-get update && apt-get install nginx -y
 В ALT Linux файлы конфигурации сайтов размещаются в `/etc/nginx/sites-available.d/` и активируются символическими ссылками в `/etc/nginx/sites-enabled.d/`:
 
 ```bash
-nano /etc/nginx/sites-available.d/r-proxy.conf
+vim /etc/nginx/sites-available.d/r-proxy.conf
 ```
 
 Вставляем следующую конфигурацию с двумя виртуальными серверами:

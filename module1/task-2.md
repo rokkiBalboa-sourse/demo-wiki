@@ -59,8 +59,8 @@ systemctl restart network
 ### 2.1. Установка пакетов
 
 ```bash
-# Обновляем кэш репозиториев и устанавливаем пакет nftables и текстовый редактор nano:
-apt-get update && apt-get install nftables nano -y
+# Обновляем кэш репозиториев и устанавливаем пакет nftables:
+apt-get update && apt-get install nftables -y
 ```
 
 ---
@@ -70,7 +70,7 @@ apt-get update && apt-get install nftables nano -y
 Создаём конфигурационный файл правил `/etc/nftables/nftables.nft`:
 
 ```bash
-nano /etc/nftables/nftables.nft
+vim /etc/nftables/nftables.nft
 ```
 ::: tip Важно
 Если в файле присутствует другая конфигурация, полностью её удалите
