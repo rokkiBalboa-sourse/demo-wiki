@@ -1,179 +1,141 @@
 ---
-title: "Задание №8: Инвентаризация рабочих мест через Ansible на BR-SRV (PC-INFO)"
-description: "Размещение и запуск Ansible-плейбука инвентаризации из Additional.iso на сервере BR-SRV для сбора имени компьютера и IP-адреса с узлов HQ-SRV и HQ-CLI с сохранением отчётов в /etc/ansible/PC-INFO/*.yml"
+title: "Задание №8: Инвентаризация рабочих мест через Ansible на BR-SRV"
+description: "Пошаговая инструкция по настройке и запуску Ansible-плейбука get_hostname_address.yml на сервере BR-SRV для сбора имени хоста и IP-адреса с машин HQ-SRV и HQ-CLI с сохранением отчётов в /etc/ansible/PC-INFO/"
 ---
 
-# Задание №8: Инвентаризация рабочих мест через Ansible на BR-SRV (PC-INFO)
+# Задание №8: Инвентаризация рабочих мест через Ansible на BR-SRV
 
-В данном задании на сервере автоматизации (**BR-SRV**) организуется регулярная инвентаризация аппаратных узлов сети (**HQ-SRV** и **HQ-CLI**) с помощью инструмента автоматизации **Ansible**.
+В данном задании на сервере управления **BR-SRV** настраивается автоматизированная инвентаризация сетевых узлов **HQ-SRV** и **HQ-CLI** с помощью инструмента автоматизации **Ansible**.
 
-Файл плейбука копируется из директории `playbook` подключаемого диска `Additional.iso` в рабочий каталог `/etc/ansible/`. Плейбук автоматически собирает факты об исследуемых машинах (имя хоста и его IP-адрес) и генерирует структурированные YAML-отчёты в подкаталоге `/etc/ansible/PC-INFO/`, где каждый файл назван строгим именем соответствующего компьютера (например, `HQ-SRV.yml` и `HQ-CLI.yml`).
+Плейбук `get_hostname_address.yml` копируется с диска `Additional.iso` (или создаётся в каталоге `/etc/ansible/`). При выполнении плейбук опрашивает целевые машины через сбор фактов `gather_facts: true` и сохраняет отчёты в формате `.yml` в каталог `/etc/ansible/PC-INFO/` с именами компьютеров, фиксируя имя хоста (`Hostname`) и его сетевой IP-адрес (`IP_Address`).
 
 > [!IMPORTANT] Где выполнять
-> Все действия выполняются под пользователем `root` на сервере **BR-SRV** (управляющий узел Ansible, настроенный в Модуле №2).
+> Все действия выполняются под пользователем `root` на сервере **BR-SRV**.
 
 ---
 
-## 1. Теоретическая справка: сбор фактов в Ansible и делегирование задач
+## 1. Пошаговая инструкция на сервере BR-SRV
 
-При выполнении плейбука директива `gather_facts: yes` опрашивает удалённые хосты через подсистему `setup` и извлекает системные переменные:
-* `ansible_hostname` — короткое имя хоста компьютера;
-* `ansible_default_ipv4.address` — IP-адрес основного сетевого интерфейса.
+Выполните следующие шаги на сервере **BR-SRV**:
 
-### Делегирование создания файлов на управляющий узел:
-С помощью конструкции `delegate_to: localhost` задача генерации итогового файла отчёта выполняется непосредственно на сервере `BR-SRV`, сохраняя собранную информацию в локальный каталог `/etc/ansible/PC-INFO/{{ ansible_hostname }}.yml`.
+### Шаг 1. Монтирование диска Additional.iso и проверка
+
+Проверяем точку монтирования `/mnt/`:
+
+```bash
+ls -l /mnt/
+```
+
+> Если команда возвращает `total 0` (диск ещё не смонтирован), выполняем монтирование привода:
+> ```bash
+> mount -o loop /dev/sr0 /mnt/ -v
+> ```
 
 ---
 
-## 2. Памятка по работе в Vim
+### Шаг 2. Подготовка каталога и копирование плейбука
 
-::: tip Памятка по работе в Vim
-* **Вход в режим редактирования**: нажмите клавишу `i`.
-* **Выход в командный режим**: нажмите `Esc`.
-* **Сохранить и выйти**: введите `:wq` и нажмите `Enter` (или `:q!` для отмены и выхода без сохранения).
+Копируем файл плейбука в директорию Ansible и создаём подкаталог для отчётов:
+
+```bash
+cp /mnt/playbook/get_hostname_address.yml /etc/ansible/
+cd /etc/ansible/
+mkdir -p PC-INFO
+```
+
+---
+
+### Шаг 3. Создание или проверка содержимого get_hostname_address.yml
+
+Если файл необходимо создать или отредактировать вручную:
+
+```bash
+cat << "EOF" > get_hostname_address.yml
+---
+- name: "Get data from hosts"
+  gather_facts: true
+  hosts:
+    - HQ-SRV
+    - HQ-CLI
+  tasks:
+    - name: "Creating a data file" 
+      copy:
+        dest: /etc/ansible/PC-INFO/{{ ansible_hostname }}.yml
+        content: |
+          Hostname: {{ ansible_hostname }}
+          IP_Address: {{ ansible_default_ipv4.address }}
+      delegate_to: localhost
+EOF
+```
+
+::: tip Как работает плейбук
+* **`gather_facts: true`** — запускает опрос системных переменных узлов (имя машины, IP-адрес интерфейса).
+* **`hosts: HQ-SRV, HQ-CLI`** — список опрашиваемых целевых хостов (должны быть предварительно прописаны в `/etc/ansible/hosts`).
+* **`dest: /etc/ansible/PC-INFO/{{ ansible_hostname }}.yml`** — сохраняет файл с именем инвентаризированного компьютера.
+* **`delegate_to: localhost`** — указывает создавать файл локально на самом сервере `BR-SRV`, а не на удалённых узлах.
 :::
 
 ---
 
-## 3. Подготовка и размещение плейбука на сервере BR-SRV
+### Шаг 4. Проверка синтаксиса плейбука
 
-### Шаг 1. Проверка файла инвентаря /etc/ansible/hosts
-
-Убедитесь, что в файле инвентаря присутствуют хосты `HQ-SRV` и `HQ-CLI`:
+Перед запуском обязательно проверяем корректность структуры YAML:
 
 ```bash
-cat /etc/ansible/hosts
-```
-
-Если группа не создана, отредактируйте `/etc/ansible/hosts`:
-
-```ini
-[targets]
-HQ-SRV ansible_host=192.168.1.10
-HQ-CLI ansible_host=192.168.2.10
-
-[targets:vars]
-ansible_port=2026
-ansible_user=sshuser
-```
-
-Проверьте доступность узлов:
-```bash
-ansible targets -m ping
+ansible-playbook --syntax-check get_hostname_address.yml
 ```
 
 ---
 
-### Шаг 2. Копирование плейбука с диска Additional.iso
+### Шаг 5. Запуск инвентаризации
 
-Монтируем диск `Additional.iso` и копируем файл:
-
-```bash
-mkdir -p /mnt/iso
-mount /dev/sr0 /mnt/iso 2>/dev/null || mount /dev/cdrom /mnt/iso 2>/dev/null
-
-# Копируем плейбук в каталог /etc/ansible/
-cp -r /mnt/iso/playbook/* /etc/ansible/
-```
-
-Создаём каталог для отчётов:
-```bash
-mkdir -p /etc/ansible/PC-INFO
-```
-
----
-
-### Шаг 3. Анализ и структура эталонного плейбука инвентаризации
-
-Если файл требует создания или корректировки, откройте его в редакторе:
+Выполняем плейбук:
 
 ```bash
-vim /etc/ansible/inventory_playbook.yml
-```
-
-Эталонный код плейбука согласно спецификации задания:
-
-```yaml
----
-- name: Инвентаризация компьютеров сети (сбор имени и IP-адреса)
-  hosts: targets
-  gather_facts: yes
-  tasks:
-    - name: Создание локальной директории для отчётов
-      file:
-        path: /etc/ansible/PC-INFO
-        state: directory
-        mode: '0755'
-      delegate_to: localhost
-      run_once: true
-
-    - name: Сохранение файла отчёта в формате .yml с именем компьютера
-      copy:
-        dest: "/etc/ansible/PC-INFO/{{ ansible_hostname }}.yml"
-        content: |
-          hostname: "{{ ansible_hostname }}"
-          ip_address: "{{ ansible_default_ipv4.address }}"
-      delegate_to: localhost
-```
-
----
-
-## 4. Запуск инвентаризации
-
-Запустите выполнение плейбука:
-
-```bash
-ansible-playbook /etc/ansible/inventory_playbook.yml
+ansible-playbook get_hostname_address.yml
 ```
 
 Пример успешного выполнения:
 ```text
-PLAY [Инвентаризация компьютеров сети (сбор имени и IP-адреса)] ***********************
+PLAY [Get data from hosts] **********************************************************
 
-TASK [Gathering Facts] ***************************************************************
+TASK [Gathering Facts] **************************************************************
 ok: [HQ-SRV]
 ok: [HQ-CLI]
 
-TASK [Создание локальной директории для отчётов] **************************************
-ok: [HQ-SRV -> localhost]
-
-TASK [Сохранение файла отчёта в формате .yml с именем компьютера] ********************
+TASK [Creating a data file] *********************************************************
 changed: [HQ-SRV -> localhost]
 changed: [HQ-CLI -> localhost]
 
-PLAY RECAP ***************************************************************************
+PLAY RECAP **************************************************************************
 HQ-CLI                     : ok=2    changed=1    unreachable=0    failed=0
-HQ-SRV                     : ok=3    changed=1    unreachable=0    failed=0
+HQ-SRV                     : ok=2    changed=1    unreachable=0    failed=0
 ```
 
 ---
 
-## 5. Проверка сгенерированных отчётов
+## 2. Проверка сформированных отчётов
 
-1. **Проверяем файлы в директории `/etc/ansible/PC-INFO/`**:
-   ```bash
-   ls -la /etc/ansible/PC-INFO/
-   ```
-   В выводе должны присутствовать два файла:
-   * `HQ-SRV.yml`
-   * `HQ-CLI.yml`
+Проверяем наличие и содержимое файлов в каталоге `PC-INFO`:
 
-2. **Просматриваем содержимое отчёта HQ-SRV**:
+1. **Просмотр отчёта сервера HQ-SRV**:
    ```bash
-   cat /etc/ansible/PC-INFO/HQ-SRV.yml
+   cat PC-INFO/hq-srv.yml
    ```
-   Вывод:
+   Пример вывода:
    ```yaml
-   hostname: "HQ-SRV"
-   ip_address: "192.168.1.10"
+   Hostname: hq-srv
+   IP_Address: 192.168.1.10
    ```
 
-3. **Просматриваем содержимое отчёта HQ-CLI**:
+2. **Просмотр отчёта рабочей станции HQ-CLI**:
    ```bash
-   cat /etc/ansible/PC-INFO/HQ-CLI.yml
+   cat PC-INFO/hq-cli.yml
    ```
-   Вывод:
+   Пример вывода:
    ```yaml
-   hostname: "HQ-CLI"
-   ip_address: "192.168.2.10"
+   Hostname: hq-cli
+   IP_Address: 192.168.2.10
    ```
+
+Оба файла с расширением `.yml` успешно созданы в поддиректории `/etc/ansible/PC-INFO/` и содержат требуемые данные!
