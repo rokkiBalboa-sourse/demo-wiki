@@ -1,33 +1,22 @@
 ---
-title: "Задание №7: Мониторинг устройств на HQ-SRV (mon.au-team.irpo)"
-description: "Развёртывание открытой системы мониторинга (Prometheus + Grafana или Zabbix) на сервере HQ-SRV, мониторинг метрик CPU, RAM и диска на HQ-SRV и BR-SRV, публикация по адресу http://mon.au-team.irpo с доступом только для HQ-CLI и учётными данными admin / P@ssw0rd"
+title: "Задание №7: Мониторинг устройств на HQ-SRV (Prometheus + Grafana)"
+description: "Пошаговая настройка открытой системы мониторинга на базе Prometheus, Node Exporter и Grafana, добавление CNAME-записи mon в DNS Samba DC, настройка дашборда 1860 и учётной записи admin / P@ssw0rd"
 ---
 
-# Задание №7: Мониторинг устройств на HQ-SRV (mon.au-team.irpo)
+# Задание №7: Мониторинг устройств с помощью открытого ПО
 
-В данном задании на сервере главного офиса (**HQ-SRV**) развёртывается открытая система мониторинга инфраструктуры на базе стека **Prometheus + Node Exporter + Grafana** (или **Zabbix**).
+В данном задании на сервере главного офиса (**HQ-SRV**) развёртывается стек мониторинга на базе **Prometheus**, агентов **Node Exporter** и системы визуализации **Grafana**. 
 
-Система собирает и визуализирует ключевые аппаратные метрики серверов **HQ-SRV** и **BR-SRV** (нагрузка на CPU, использование оперативной памяти, занятость накопителей). Веб-интерфейс публикуется по адресу **`http://mon.au-team.irpo`** с доступом исключительно из внутренней сети офиса HQ (рабочая станция **HQ-CLI**), настроены авторизационные данные `admin` / `P@ssw0rd`, а в DNS-зону `au-team.irpo` внесена соответствующая ресурсная запись.
+На контроллере домена (**BR-SRV**) создаётся DNS-запись CNAME `mon` для перенаправления на `hq-srv.au-team.irpo`. На сервере HQ-SRV настраивается сбор метрик с серверов `HQ-SRV` (`192.168.1.10:9100`) и `BR-SRV` (`192.168.3.10:9100`), в Grafana подключается источник данных Prometheus, импортируется популярный дашборд системных метрик **1860**, а пароль администратора меняется на **`P@ssw0rd`**.
 
 > [!IMPORTANT] Где выполнять
-> 1. **HQ-SRV** — установка и настройка агента Node Exporter, сервера сбора метрик Prometheus, визуализатора Grafana (или Zabbix), прокси Nginx на порту 80 с ограничением доступа, добавление A-записи `mon` в DNS.
-> 2. **BR-SRV** — установка и запуск агента Node Exporter (порт 9100).
-> 3. **HQ-CLI** — проверка доступа через браузер по адресу `http://mon.au-team.irpo`.
+> 1. **BR-SRV** — установка Node Exporter (порт 9100), добавление CNAME-записи `mon` в DNS Samba DC.
+> 2. **HQ-SRV** — установка Prometheus, Grafana и Node Exporter, настройка `prometheus.yml`, запуск сервисов.
+> 3. **HQ-CLI** — проверка веб-интерфейсов через браузер, импорт дашборда 1860 в Grafana.
 
 ---
 
-## 1. Теоретическая справка и обоснование выбора стека
-
-| Компонент | Назначение | Порт по умолчанию |
-| :--- | :--- | :---: |
-| **Node Exporter** | Легковесный системный агент сбора аппаратных метрик ядра Linux (ЦП, память, диски, сеть) | `9100` |
-| **Prometheus** | Высокопроизводительная база данных временных рядов (TSDB) для опроса агентов и хранения метрик | `9090` |
-| **Grafana** | Платформа визуализации с интерактивными дашбордами и графиками | `3000` |
-| **Nginx (Reverse Proxy)** | Проксирование веб-интерфейса Grafana на стандартный порт `80` по имени `mon.au-team.irpo` с контролем доступа | `80` |
-
----
-
-## 2. Памятка по работе в Vim
+## 1. Памятка по работе в Vim
 
 ::: tip Памятка по работе в Vim
 * **Вход в режим редактирования**: нажмите клавишу `i`.
@@ -37,176 +26,188 @@ description: "Развёртывание открытой системы мон�
 
 ---
 
-## 3. Добавление записи mon в DNS-сервер
+## 2. Настройка на сервере BR-SRV
 
-На сервере управления DNS (**HQ-SRV** в BIND или **BR-SRV** в Samba DC):
+Выполните команды под пользователем `root` на контроллере домена **BR-SRV**:
 
-### Вариант А. На HQ-SRV (DNS BIND):
-Открываем файл прямой зоны `/etc/bind/zone/au-team.irpo`:
+### Шаг 1. Установка и запуск агента сбора метрик Node Exporter
+
 ```bash
-vim /etc/bind/zone/au-team.irpo
-```
-Добавляем строку:
-```text
-mon IN A 192.168.1.10
-```
-Инкрементируем `Serial` зоны и перезапускаем BIND:
-```bash
-systemctl restart bind
-rndc reload
+apt-get update && apt-get install prometheus-node_exporter -y
+
+systemctl enable --now prometheus-node_exporter
 ```
 
-### Вариант Б. На BR-SRV (Samba DC DNS):
+Проверяем, что порт `9100` открыт и слушается:
+
 ```bash
-samba-tool dns add 192.168.3.10 au-team.irpo mon A 192.168.1.10 -U Administrator%'P@ssw0rd'
+ss -ltnp | grep 9100
 ```
 
 ---
 
-## 4. Развёртывание агентов Node Exporter на HQ-SRV и BR-SRV
+### Шаг 2. Добавление записи CNAME mon в DNS-сервер Samba DC
 
-### На сервере HQ-SRV:
+Создаём каноническое имя (CNAME) `mon` указывающее на `hq-srv.au-team.irpo`:
+
 ```bash
-apt-get update && apt-get install prometheus-node_exporter -y
-systemctl enable --now prometheus-node_exporter
+samba-tool dns add br-srv.au-team.irpo au-team.irpo mon CNAME hq-srv.au-team.irpo -U Administrator
 ```
+> При запросе введите пароль администратора домена (`P@ssw0rd`).
 
-### На сервере BR-SRV:
-```bash
-apt-get update && apt-get install prometheus-node_exporter -y
-systemctl enable --now prometheus-node_exporter
-```
+Проверяем корректность добавления DNS-записи:
 
-Проверяем отдачу метрик:
 ```bash
-curl -s http://localhost:9100/metrics | head -n 10
+samba-tool dns query br-srv.au-team.irpo au-team.irpo mon CNAME -U administrator
 ```
 
 ---
 
-## 5. Установка и настройка Prometheus на HQ-SRV
+## 3. Настройка сервера мониторинга на HQ-SRV
 
-Выполните действия на **HQ-SRV**:
+Выполните действия под пользователем `root` на сервере **HQ-SRV**:
+
+### Шаг 1. Установка компонентов стека мониторинга
 
 ```bash
-apt-get install prometheus -y
+apt-get update && apt-get install prometheus grafana prometheus-node_exporter -y
 ```
 
-Редактируем файл `/etc/prometheus/prometheus.yml`:
+---
+
+### Шаг 2. Настройка конфигурации /etc/prometheus/prometheus.yml
+
+Открываем файл конфигурации Prometheus в редакторе `vim`:
 
 ```bash
 vim /etc/prometheus/prometheus.yml
 ```
 
-Добавляем в секцию `scrape_configs` цели для мониторинга обоих серверов:
+::: tip Памятка по работе в Vim
+* Нажмите `i` для перехода в режим вставки.
+* После внесения изменений нажмите `Esc`, введите `:wq` и нажмите `Enter`.
+:::
+
+В секцию `scrape_configs:` внесите или приведите блоки задач сбора метрик к следующему виду:
 
 ```yaml
 scrape_configs:
-  - job_name: 'linux-nodes'
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 5s
     static_configs:
-      - targets: ['192.168.1.10:9100']
-        labels:
-          instance: 'HQ-SRV'
+      - targets: ['localhost:9090']
+
+  - job_name: hq-srv
+    static_configs:
+       - targets: ['192.168.1.10:9100']
+
+  - job_name: br-srv
+    static_configs:
       - targets: ['192.168.3.10:9100']
-        labels:
-          instance: 'BR-SRV'
 ```
 
-Запускаем Prometheus:
+Сохраняем файл (`Esc` → `:wq` → `Enter`).
+
+---
+
+### Шаг 3. Запуск и активация служб мониторинга
+
+Включаем в автозагрузку и запускаем все компоненты:
+
 ```bash
+systemctl enable --now prometheus-node_exporter
 systemctl enable --now prometheus
-systemctl restart prometheus
+systemctl enable --now grafana-server
 ```
+
+Проверяем статус работы сервисов:
+
+```bash
+systemctl status prometheus-node_exporter prometheus grafana-server
+```
+> Все три службы должны иметь статус **`active (running)`**.
 
 ---
 
-## 6. Установка и настройка Grafana на HQ-SRV
+## 4. Настройка веб-интерфейсов через браузер на HQ-CLI
 
-Устанавливаем Grafana:
-```bash
-apt-get install grafana -y
-```
+Перейдите на клиентскую рабочую станцию **HQ-CLI** и откройте браузер:
 
-Задаём пароль администратора `P@ssw0rd`:
-```bash
-grafana-cli admin reset-admin-password P@ssw0rd
-systemctl enable --now grafana
-```
-
----
-
-## 7. Настройка Nginx с ограничением доступа для HQ-CLI
-
-Чтобы служба была доступна по стандартному URL `http://mon.au-team.irpo` и доступ был разрешён **только для клиентов офиса HQ**, создаём виртуальный хост в Nginx на **HQ-SRV**:
-
-```bash
-apt-get install nginx -y
-vim /etc/nginx/sites-available.d/mon.conf
-```
-
-Вставляем конфигурацию:
-
-```nginx
-server {
-    listen 80;
-    server_name mon.au-team.irpo;
-
-    # Ограничение доступа: разрешён только сегмент HQ (VLAN 200) и localhost
-    allow 192.168.2.0/24;
-    allow 192.168.1.0/24;
-    allow 127.0.0.1;
-    deny all;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-```
-
-Активируем сайт и перезапускаем Nginx:
-```bash
-ln -s /etc/nginx/sites-available.d/mon.conf /etc/nginx/sites-enabled.d/
-nginx -t
-systemctl enable --now nginx
-systemctl restart nginx
-```
-
----
-
-## 8. Проверка и визуализация графиков
-
-1. С рабочей станции **HQ-CLI** откройте браузер и перейдите по адресу:
+### Шаг 1. Проверка целей в Prometheus
+1. Открываем веб-интерфейс:
    ```text
-   http://mon.au-team.irpo
+   http://hq-srv.au-team.irpo:9090
    ```
-2. Введите учетные данные:
-   * **Логин**: `admin`
-   * **Пароль**: `P@ssw0rd`
-3. В Grafana добавьте источник данных: **Prometheus** (`http://127.0.0.1:9090`).
-4. Импортируйте дашборд системных метрик Node Exporter (ID: `1860` или `11074`) либо создайте панели:
-   * **CPU Usage**: `100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100)`
-   * **RAM Usage**: `(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100`
-   * **Disk Usage**: `100 - ((node_filesystem_avail_bytes{mountpoint="/"} * 100) / node_filesystem_size_bytes{mountpoint="/"})`
-5. Убедитесь, что метрики корректно поступают от обоих узлов — `HQ-SRV` и `BR-SRV`.
+2. В верхнем меню переходим: **Status** → **Targets**.
+3. В списке должны отображаться все три таргета (`prometheus`, `hq-srv`, `br-srv`) в зелёном состоянии **UP**.
 
 ---
 
-## 9. Шаблон для экзаменационного отчёта
+### Шаг 2. Первоначальный вход в Grafana и смена пароля
+1. Открываем веб-интерфейс Grafana:
+   ```text
+   http://hq-srv.au-team.irpo:3000
+   ```
+2. Вводим стандартные учетные данные:
+   * **Логин**: `admin`
+   * **Пароль**: `admin`
+3. На появившемся экране смены пароля задаём новый пароль: **`P@ssw0rd`**.
+
+---
+
+### Шаг 3. Подключение источника данных (Data Source)
+1. В левом боковом меню переходим: **Connections** → **Data Sources** → **Add data source**.
+2. Выбираем тип: **Prometheus**.
+3. В поле **Prometheus server URL** указываем:
+   ```text
+   http://hq-srv.au-team.irpo:9090
+   ```
+   *(или `http://192.168.1.10:9090`)*
+4. Нажимаем кнопку **Save & test** (должно появиться зелёное сообщение «Data source is working»).
+
+---
+
+### Шаг 4. Импорт дашборда визуализации 1860
+1. В левом меню переходим: **Dashboards** → **New** → **Import**.
+2. В поле **Find and import dashboards for common applications at grafana.com/dashboards** вводим номер ID:
+   ```text
+   1860
+   ```
+3. Нажимаем кнопку **Load**.
+4. В поле выбора источника данных (Prometheus) выбираем подключенный источник **Prometheus**.
+5. Нажимаем **Import**.
+6. Открывается дашборд *Node Exporter Full*, на котором визуализируются графики загрузки процессора (CPU), оперативной памяти (RAM) и занятости дисковых накопителей с возможностью переключения между серверами `HQ-SRV` и `BR-SRV`.
+
+---
+
+### Шаг 5. Проверка доступности по CNAME-имени mon
+В адресной строке браузера открываем адрес:
+
+```text
+http://mon.au-team.irpo:3000
+```
+
+Интерфейс Grafana должен успешно открываться по имени `mon.au-team.irpo`!
+
+---
+
+## 5. Шаблон для экзаменационного отчёта
 
 ```markdown
-### Отчёт по заданию: Система мониторинга инфраструктуры
+### Отчёт по заданию: Система мониторинга устройств
 
-1. **Выбранное программное обеспечение**: Стек Prometheus (сбор метрик) + Node Exporter (системные сенсоры) + Grafana (веб-визуализация).
+1. **Выбранное программное обеспечение**: Стек открытого ПО Prometheus (сервер сбора метрик) + Node Exporter (агенты мониторинга хостов) + Grafana (веб-визуализация метрик).
 2. **Обоснование выбора**:
-   * Открытый исходный код, отсутствие лицензионных ограничений.
-   * Высокая скорость работы и низкое потребление ресурсов хоста.
-   * Наглядные настраиваемые панели визуализации ЦП, ОЗУ и накопителей в реальном времени.
-3. **Параметры и сетевые порты**:
-   * Порт веб-интерфейса мониторинга: 80 (HTTP / Nginx Reverse Proxy) с перенаправлением на Grafana (TCP 3000).
-   * Порт сервера сбора метрик Prometheus: TCP 9090.
+   * Полностью открытый исходный код и соответствие отраслевым стандартам Linux-инфраструктуры.
+   * Минимальная нагрузка на контролируемые серверы (легковесные демоны на Go).
+   * Богатая библиотека готовых профессиональных панелей мониторинга (дашборд 1860 для детального анализа CPU, памяти и дисков).
+3. **Используемые сетевые порты**:
    * Порт агентов Node Exporter на HQ-SRV и BR-SRV: TCP 9100.
-4. **Контроль доступа**: Доступ к интерфейсу ограничен директивами Nginx allow/deny исключительно для сети клиентской станции HQ-CLI (192.168.2.0/24), внешний доступ заблокирован.
+   * Порт сервера Prometheus: TCP 9090.
+   * Порт веб-интерфейса Grafana: TCP 3000.
+4. **Сетевые параметры и DNS**:
+   * На DNS-сервере контроллера домена Samba DC создана CNAME-запись mon.au-team.irpo -> hq-srv.au-team.irpo.
+   * Мониторинг доступен клиентам сети по адресу: http://mon.au-team.irpo:3000
+   * Авторизация администратора: логин admin, пароль P@ssw0rd.
 ```
