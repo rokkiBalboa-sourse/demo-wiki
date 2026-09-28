@@ -123,7 +123,8 @@ export default defineConfig({
             { text: 'Задание №5: Автоматизация с Ansible на сервере BR-SRV', link: '/module2/task-5' },
             { text: 'Задание №6: Веб-приложение в Docker на сервере BR-SRV', link: '/module2/task-6' },
             { text: 'Задание №7: Веб-приложение Apache + MariaDB на сервере HQ-SRV', link: '/module2/task-7' },
-            { text: 'Задание №8: Статический проброс портов (DNAT) на роутерах', link: '/module2/task-8' }
+            { text: 'Задание №8: Статический проброс портов (DNAT) на роутерах', link: '/module2/task-8' },
+            { text: 'Задание №9: Обратный прокси-сервер Nginx на ISP', link: '/module2/task-9' }
           ]
         }
       ]
