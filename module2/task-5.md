@@ -107,7 +107,7 @@ cp -r /etc/ansible/ansible.cfg /etc/ansible/ansible.cfg.back
 rm -rf /etc/ansible/ansible.cfg
 
 # Создаём новый конфигурационный файл
-vim /etc/ansible/ansible.cfg
+nano /etc/ansible/ansible.cfg
 ```
 
 Вставляем следующее содержимое:
@@ -127,7 +127,7 @@ inventory       = /etc/ansible/hosts
 Открываем файл инвентаря:
 
 ```bash
-vim /etc/ansible/hosts
+nano /etc/ansible/hosts
 ```
 
 Вносим параметры подключения для каждого узла:

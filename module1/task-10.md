@@ -19,7 +19,7 @@ description: "Пошаговая настройка сервера BIND 9 на H
 > [!WARNING] Осторожно: не меняйте DNS до установки пакетов!
 > Если вы переключите DNS в файле `resolv.conf` на `127.0.0.1` **до** того, как установите пакеты и запустите службу BIND, на сервере **полностью пропадёт доступ в Интернет по доменным именам**. В результате команда `apt-get` не сможет подключиться к репозиториям ALT Linux.
 >
-> **Строго соблюдайте порядок:** сначала устанавливаем `bind bind-utils`, и только затем переключаем системный резолвер на локальный адрес `127.0.0.1`!
+> **Строго соблюдайте порядок:** сначала устанавливаем `bind bind-utils nano`, и только затем переключаем системный резолвер на локальный адрес `127.0.0.1`!
 
 ---
 
@@ -41,8 +41,8 @@ description: "Пошаговая настройка сервера BIND 9 на H
 Сначала скачиваем и устанавливаем службу и утилиты диагностики:
 
 ```bash
-# 1. Устанавливаем BIND и утилиты запросов (dig, host, nslookup):
-apt-get update && apt-get install bind bind-utils -y
+# 1. Устанавливаем BIND, утилиты запросов (dig, host, nslookup) и редактор nano:
+apt-get update && apt-get install bind bind-utils nano -y
 
 # 2. Перенаправляем резолвер сервера на самого себя:
 echo $'search au-team.irpo\nnameserver 127.0.0.1' > /etc/net/ifaces/enp7s1/resolv.conf
@@ -58,7 +58,7 @@ rndc-confgen -a -c /etc/bind/rndc.key
 Открываем конфигурационный файл службы:
 
 ```bash
-vim /etc/bind/options.conf
+nano /etc/bind/options.conf
 ```
 
 Полностью очищаем файл и вставляем следующую конфигурацию:
@@ -100,7 +100,7 @@ zone "168.192.in-addr.arpa" {
 
 ```bash
 cp -r /etc/bind/zone/127.in-addr.arpa /etc/bind/zone/au-team.irpo
-vim /etc/bind/zone/au-team.irpo
+nano /etc/bind/zone/au-team.irpo
 ```
 
 Приводим файл к следующему виду:
@@ -137,7 +137,7 @@ web     IN A     172.16.2.1
 
 ```bash
 cp -r /etc/bind/zone/127.in-addr.arpa /etc/bind/zone/168.192.in-addr.arpa
-vim /etc/bind/zone/168.192.in-addr.arpa
+nano /etc/bind/zone/168.192.in-addr.arpa
 ```
 
 Заполняем записями **PTR**:

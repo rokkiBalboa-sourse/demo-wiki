@@ -117,7 +117,7 @@ mariadb -e "USE webdb; SHOW TABLES;"
 Открываем файл приложения `/var/www/html/index.php`:
 
 ```bash
-vim /var/www/html/index.php
+nano /var/www/html/index.php
 ```
 
 Находим блок параметров подключения к базе данных и указываем созданные реквизиты:
@@ -129,7 +129,7 @@ $password = "P@ssw0rd";
 $dbname = "webdb";
 ```
 
-Сохраняем файл и выходим (`Esc` → `:wq` → `Enter`).
+Сохраняем файл (`Ctrl + O`, `Enter`, `Ctrl + X`).
 
 ---
 

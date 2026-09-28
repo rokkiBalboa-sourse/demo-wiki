@@ -56,7 +56,7 @@ sed -i 's/AUTO_LOCAL_RESOLVER=yes/AUTO_LOCAL_RESOLVER=no/' /etc/sysconfig/dnsmas
 
 ```bash
 # 2. Редактируем конфигурацию:
-vim /etc/dnsmasq.conf
+nano /etc/dnsmasq.conf
 ```
 
 Вставляем следующие параметры:
