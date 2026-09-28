@@ -1,7 +1,7 @@
 {
-  "name": "wiki-site",
+  "name": "demo-wiki",
   "version": "1.0.0",
-  "description": "Modern documentation wiki site powered by VitePress",
+  "description": "Modern demo-wiki documentation powered by VitePress",
   "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev",

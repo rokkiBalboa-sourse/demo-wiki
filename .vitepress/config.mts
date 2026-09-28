@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   lang: 'ru-RU',
-  title: 'Wiki Site',
+  title: 'demo-wiki',
   description: 'Современная база знаний и документация на VitePress',
   cleanUrls: true,
   ignoreDeadLinks: 'localhostLinks',
@@ -14,8 +14,8 @@ export default defineConfig({
   ],
 
   themeConfig: {
-    siteTitle: 'Wiki Site',
-    logo: '/logo.svg',
+    siteTitle: 'demo-wiki',
+    logo: '/logo.png',
 
     search: {
       provider: 'local',
@@ -46,8 +46,7 @@ export default defineConfig({
       { text: 'Главная', link: '/' },
       { text: 'Модуль 1', link: '/module1/' },
       { text: 'Модуль 2', link: '/module2/' },
-      { text: 'Модуль 3', link: '/module3/' },
-      { text: 'Админка', link: '/admin/index.html', target: '_blank' }
+      { text: 'Модуль 3', link: '/module3/' }
     ],
 
     sidebar: {
@@ -161,7 +160,7 @@ export default defineConfig({
 
     footer: {
       message: 'Работает на VitePress • Быстрый и удобный движок для документации',
-      copyright: `© ${new Date().getFullYear()} Wiki Site`
+      copyright: `© ${new Date().getFullYear()} demo-wiki`
     },
 
     docFooter: {
