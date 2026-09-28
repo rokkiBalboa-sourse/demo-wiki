@@ -1,33 +1,21 @@
 ---
-title: "Задание №2: Центр сертификации ГОСТ на HQ-SRV и HTTPS в Nginx на ISP"
-description: "Развёртывание Центра сертификации (CA) с отечественными алгоритмами шифрования (ГОСТ Р 34.12-2015 / 34.10-2012) на сервере HQ-SRV, выпуск сертификатов на 30 дней, доверие на HQ-CLI и перевод Nginx на HTTPS"
+title: "Задание №2: Настройка центра сертификации ГОСТ и HTTPS в Nginx"
+description: "Пошаговая инструкция по настройке центра сертификации на базе ГОСТ Р 34.10-2012 / 34.11-2012, выпуску сертификатов на 30 дней, настройке HTTPS в Nginx на ISP и установке КриптоПро CSP на HQ-CLI"
 ---
 
-# Задание №2: Центр сертификации ГОСТ на HQ-SRV и HTTPS в Nginx на ISP
+# Задание №2: Настройка центра сертификации ГОСТ и HTTPS в Nginx
 
-В данном задании на сервере главного офиса (**HQ-SRV**) развёртывается локальный центр сертификации (Certification Authority, CA), использующий российские криптографические алгоритмы (ГОСТ). 
+В данном задании на узле **ISP** настраивается Центр сертификации с использованием отечественных криптографических алгоритмов ГОСТ (`openssl-gost-engine`). 
 
-Выпускаются SSL/TLS-сертификаты со сроком действия **30 дней** для доменных имён `web.au-team.irpo` и `docker.au-team.irpo`. На маршрутизаторе **ISP** реверсивный прокси-сервер **Nginx** переводится на защищённый протокол **HTTPS** (порт 443), а на рабочей станции **HQ-CLI** обеспечивается доверие корневому сертификату, благодаря чему браузер открывает оба защищённых ресурса без предупреждений о безопасности.
+Выпускаются сертификаты со сроком действия **30 дней** для доменных имён `web.au-team.irpo` и `docker.au-team.irpo`. Реверсивный прокси-сервер **Nginx** переводится на протокол **HTTPS** (порт 443) с ГОСТ-шифрованием. На рабочей станции **HQ-CLI** устанавливается СКЗИ **КриптоПро CSP**, импортируется корневой сертификат и проверяется защищённый доступ без предупреждений безопасности.
 
 > [!IMPORTANT] Узлы выполнения
-> 1. **HQ-SRV** — генерация корневого ключа и сертификата CA (ГОСТ), подпись серверных сертификатов на 30 дней.
-> 2. **ISP** — настройка Nginx на приём HTTPS (порт 443), подключение сертификатов и ключей.
-> 3. **HQ-CLI** — установка корневого сертификата в системное хранилище доверенных сертификатов ALT Linux.
+> 1. **ISP** — установка ГОСТ-движка OpenSSL, выпуск корневого и серверных сертификатов на 30 дней, перевод Nginx на HTTPS (порт 443).
+> 2. **HQ-CLI** — копирование сертификата CA, обновление хранилища `ca-trust`, установка КриптоПро CSP через GUI и проверка сайтов в Яндекс Браузере.
 
 ---
 
-## 1. Теоретическая справка: криптография ГОСТ в OpenSSL
-
-В ALT Linux поддержка криптографических стандартов ГОСТ (ГОСТ Р 34.10-2012, ГОСТ Р 34.11-2012) реализована через специальный криптографический модуль (движок) **`gost-engine`** (`openssl-engines-gost`).
-
-### Основные компоненты:
-* **ГОСТ Р 34.10-2012** — алгоритм формирования и проверки электронной цифровой подписи (256 или 512 бит).
-* **ГОСТ Р 34.11-2012 (Стрибог)** — функция хэширования (длина хэш-кода 256 или 512 бит, алгоритмы `streebog256` / `streebog512`).
-* **Хранилище сертификатов ALT Linux** — централизованная утилита `update-ca-trust` управляет доверенными сертификатами в `/usr/share/ca-certificates/` и `/etc/pki/ca-trust/source/anchors/`.
-
----
-
-## 2. Памятка по работе в Vim
+## 1. Памятка по работе в Vim
 
 ::: tip Памятка по работе в Vim
 * **Вход в режим редактирования**: нажмите клавишу `i`.
@@ -37,203 +25,164 @@ description: "Развёртывание Центра сертификации (
 
 ---
 
-## 3. Настройка Центра сертификации (CA) на сервере HQ-SRV
+## 2. Настройка Центра сертификации и Nginx на ISP
 
-Выполните действия под пользователем `root` на сервере **HQ-SRV**:
+Все команды выполняются под пользователем `root` на машине **ISP**:
 
-### Шаг 1. Установка пакетов с поддержкой ГОСТ
+### Шаг 1. Разрешение входа root по SSH (для передачи файлов)
 
 ```bash
-apt-get update && apt-get install openssl openssl-engines-gost -y
-```
-
-Проверяем доступность модуля `gost`:
-```bash
-openssl engine -v gost
+echo "PermitRootLogin yes" >> /etc/openssh/sshd_config
+systemctl restart sshd
 ```
 
 ---
 
-### Шаг 2. Создание рабочей директории и конфигурации OpenSSL
+### Шаг 2. Установка ПО и активация ГОСТ-движка
 
 ```bash
-mkdir -p /root/ca && cd /root/ca
+apt-get install openssl openssl-engines -y
+apt-get install openssl-gost-engine -y
+control openssl-gost enabled
 ```
 
-Создаём файл конфигурации `openssl-gost.cnf`:
+Проверяем доступность модуля ГОСТ и поддерживаемых шифров:
 
 ```bash
-vim /root/ca/openssl-gost.cnf
-```
-
-Вставьте следующую конфигурацию:
-
-```ini
-openssl_conf = openssl_def
-
-[openssl_def]
-engines = engine_section
-
-[engine_section]
-gost = gost_section
-
-[gost_section]
-engine_id = gost
-default_algorithms = ALL
-CRYPT_PARAMS = id-Gost28147-89-CryptoPro-A-ParamSet
-
-[req]
-default_bits = 2048
-default_md = md_gost12_256
-distinguished_name = req_distinguished_name
-prompt = no
-
-[req_distinguished_name]
-C = RU
-ST = Moscow
-L = Moscow
-O = AU-TEAM
-OU = IT
-CN = au-team-RootCA
-
-[v3_ca]
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer
-basicConstraints = critical, CA:true
-keyUsage = critical, digitalSignature, cRLSign, keyCertSign
-
-[v3_req]
-basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1 = web.au-team.irpo
-DNS.2 = docker.au-team.irpo
+openssl engine
+openssl ciphers | tr ':' '\n' | grep GOST
 ```
 
 ---
 
-### Шаг 3. Генерация корневого сертификата CA (ГОСТ)
+### Шаг 3. Создание корневого сертификата CA (ROOT-CA)
 
 1. **Генерируем закрытый ключ корневого УЦ**:
    ```bash
    openssl genpkey -algorithm gost2012_256 \
-     -pkeyopt paramset:A \
-     -out rootca.key
+     -pkeyopt paramset:TCB -out ca.key
    ```
 
-2. **Выпускаем самоподписанный корневой сертификат CA**:
+2. **Выпускаем самоподписанный корневой сертификат**:
    ```bash
-   openssl req -new -x509 -config openssl-gost.cnf \
-     -key rootca.key \
-     -out rootca.crt \
-     -days 365 -extensions v3_ca
+   openssl req -new -x509 -md_gost12_256 \
+     -days 90 -key ca.key -out ca.crt
    ```
+   > В поле **Common Name** обязательно укажите: `ROOT-CA.AU-TEAM.IRPO` (остальные поля можно пропустить нажатием `Enter`).
 
 ---
 
-### Шаг 4. Выпуск серверного сертификата для веб-серверов на 30 дней
+### Шаг 4. Создание ключей и запросов (CSR) для веб-серверов
 
-1. **Генерируем закрытый ключ сервера**:
+1. **Генерируем закрытые ключи**:
    ```bash
    openssl genpkey -algorithm gost2012_256 \
-     -pkeyopt paramset:A \
-     -out server.key
+     -pkeyopt paramset:A -out web.au-team.irpo.key
+
+   openssl genpkey -algorithm gost2012_256 \
+     -pkeyopt paramset:A -out docker.au-team.irpo.key
    ```
 
-2. **Формируем запрос на подпись сертификата (CSR)**:
+2. **Создаём запрос на сертификат для web.au-team.irpo**:
    ```bash
-   openssl req -new -config openssl-gost.cnf \
-     -key server.key \
-     -out server.csr
+   openssl req -new -md_gost12_256 \
+     -key web.au-team.irpo.key \
+     -out web.au-team.irpo.csr
    ```
+   > В поле **Common Name** обязательно укажите: `WEB.AU-TEAM.IRPO`
 
-3. **Подписываем сертификат корневым ключом CA ровно на 30 дней**:
+3. **Создаём запрос на сертификат для docker.au-team.irpo**:
    ```bash
-   openssl x509 -req -in server.csr \
-     -CA rootca.crt -CAkey rootca.key -CAcreateserial \
-     -out server.crt -days 30 \
-     -extfile openssl-gost.cnf -extensions v3_req
+   openssl req -new -md_gost12_256 \
+     -key docker.au-team.irpo.key \
+     -out docker.au-team.irpo.csr
    ```
-
-4. **Проверяем срок действия сертификата**:
-   ```bash
-   openssl x509 -in server.crt -noout -dates
-   ```
+   > В поле **Common Name** обязательно укажите: `DOCKER.AU-TEAM.IRPO`
 
 ---
 
-## 4. Передача сертификатов на маршрутизатор ISP и рабочую станцию HQ-CLI
+### Шаг 5. Выпуск сертификатов веб-серверов ровно на 30 дней
 
-С сервера **HQ-SRV** передаём сертификаты:
+Подписываем оба запроса корневым ключом УЦ со сроком действия **30 дней**:
 
 ```bash
-# Копируем сертификаты на ISP:
-scp server.crt server.key rootca.crt root@172.16.1.1:/etc/nginx/
+openssl x509 -req -in web.au-team.irpo.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial \
+  -out web.au-team.irpo.crt -days 30
 
-# Копируем корневой сертификат на HQ-CLI:
-scp rootca.crt root@192.168.2.10:/tmp/
+openssl x509 -req -in docker.au-team.irpo.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial \
+  -out docker.au-team.irpo.crt -days 30
+```
+
+Проверяем наличие созданных файлов сертификатов и доступность ГОСТ:
+
+```bash
+ls -l
+openssl engine
+openssl ciphers | tr ':' '\n' | grep GOST
 ```
 
 ---
 
-## 5. Настройка Nginx на маршрутизаторе ISP
+### Шаг 6. Настройка HTTPS в Nginx
 
-Переходим на узел **ISP** под пользователем `root`.
-
-Редактируем файл обратного прокси `/etc/nginx/sites-available.d/r-proxy.conf`:
+Открываем конфигурационный файл реверсивного прокси в редакторе `vim`:
 
 ```bash
 vim /etc/nginx/sites-available.d/r-proxy.conf
 ```
 
-Вносим обновлённую конфигурацию виртуальных хостов с поддержкой HTTPS:
+::: tip Памятка по работе в Vim
+* **Вход в режим редактирования**: нажмите клавишу `i`.
+* **Выход в командный режим**: нажмите `Esc`.
+* **Сохранить и выйти**: введите `:wq` и нажмите `Enter` (или `:q!` для отмены и выхода без сохранения).
+:::
+
+Приведите файл конфигурации строго к следующему виду:
 
 ```nginx
 server {
-    listen 80;
-    server_name web.au-team.irpo docker.au-team.irpo;
-    return 301 https://$host$request_uri;
+        listen 443 ssl;
+        server_name web.au-team.irpo;
+
+                ssl_certificate /root/web.au-team.irpo.crt; 
+                ssl_certificate_key /root/web.au-team.irpo.key; 
+                ssl_ciphers GOST2012-GOST8912-GOST8912; 
+                ssl_protocols TLSv1.2; 
+                ssl_prefer_server_ciphers on;
+        location / {
+                proxy_pass http://172.16.1.10:8080;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                auth_basic "Restricted Access";
+                auth_basic_user_file /etc/nginx/.htpasswd;
+        }
 }
-
 server {
-    listen 443 ssl;
-    server_name web.au-team.irpo;
-
-    ssl_certificate /etc/nginx/server.crt;
-    ssl_certificate_key /etc/nginx/server.key;
-
-    location / {
-        proxy_pass http://172.16.1.10:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        auth_basic "Restricted Access";
-        auth_basic_user_file /etc/nginx/.htpasswd;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name docker.au-team.irpo;
-
-    ssl_certificate /etc/nginx/server.crt;
-    ssl_certificate_key /etc/nginx/server.key;
-
-    location / {
-        proxy_pass http://172.16.2.10:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+        listen 443 ssl;
+        server_name docker.au-team.irpo;
+                ssl_certificate /root/docker.au-team.irpo.crt; 
+                ssl_certificate_key /root/docker.au-team.irpo.key; 
+                ssl_ciphers GOST2012-GOST8912-GOST8912; 
+                ssl_protocols TLSv1.2; 
+                ssl_prefer_server_ciphers on; 
+        location / {
+                proxy_pass http://172.16.2.10:8080;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
 }
 ```
 
-Проверяем конфигурацию и перезапускаем Nginx:
+Сохраняем изменения (`Esc` → `:wq` → `Enter`).
+
+Проверяем синтаксис конфигурации Nginx и перезапускаем службу:
+
 ```bash
 nginx -t
 systemctl restart nginx
@@ -241,28 +190,76 @@ systemctl restart nginx
 
 ---
 
-## 6. Обеспечение доверия сертификату на рабочей станции HQ-CLI
+## 3. Настройка клиентской машины HQ-CLI
 
-Переходим на машину **HQ-CLI** под пользователем `root`:
+Выполните действия на рабочей станции **HQ-CLI**:
 
-### Шаг 1. Установка корневого сертификата в системное хранилище
+### Шаг 1. Импорт корневого сертификата CA с узла ISP
+
+Копируем корневой сертификат `ca.crt` с маршрутизатора ISP в системное хранилище доверенных сертификатов:
+
 ```bash
-cp /tmp/rootca.crt /etc/pki/ca-trust/source/anchors/
-update-ca-trust
+scp root@172.16.1.1:~/ca.crt /etc/pki/ca-trust/source/anchors/
 ```
 
-### Шаг 2. Добавление сертификата в базу браузера (NSS DB)
-Для Яндекс Браузера / Chromium сертификат импортируется в базу NSS пользователя:
+Обновляем системные доверенные хранилища:
 
 ```bash
-apt-get install libnss-sysinit nss-utils -y
-certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n "au-team-RootCA" -i /tmp/rootca.crt
+update-ca-trust extract
 ```
 
 ---
 
-## 7. Проверка работы
+### Шаг 2. Установка зависимостей и скачивание КриптоПро CSP
 
-На рабочей станции **HQ-CLI** откройте Яндекс Браузер и перейдите по адресам:
-1. `https://web.au-team.irpo` — после ввода логина `WEB` и пароля `P@ssw0rd` открывается веб-приложение Apache, замок в адресной строке зелёный/безопасный без предупреждений.
-2. `https://docker.au-team.irpo` — открывается контейнеризированное веб-приложение без предупреждений об ошибке безопасности.
+```bash
+apt-get install cryptopro-preinstall -y
+
+# Сохраняем ссылку на дистрибутив:
+echo "https://disk.yandex.ru/d/6yI-K7zWPcPalg" > /home/user/link.txt
+```
+
+---
+
+### Шаг 3. Установка КриптоПро через графический установщик
+
+1. Открываем графический интерфейс (GUI) на **HQ-CLI**.
+2. Открываем браузер, переходим по ссылке из файла `/home/user/link.txt`, скачиваем архив КриптоПро CSP.
+3. Распаковываем скачанный архив в домашнюю директорию `/home/user/`.
+4. В терминале переходим в папку с установщиком и запускаем графический мастер:
+
+```bash
+cd /home/user/linux-amd64/
+./install_gui.sh
+```
+
+5. В появившемся окне мастера обязательно отмечаем следующие пакеты:
+   * **Криптопровайдер КС1**
+   * **Графические диалоги**
+   * **cptools, многоцелевое графическое приложение**
+   * **Браузерный плагин + CAdES**
+   * **Импортировать корневые сертификаты из ОС**
+6. Нажимаем кнопку **«Установить»**.
+7. Запрос ввода лицензионного ключа **пропускаем**.
+
+---
+
+## 4. Проверка защищённого соединения
+
+1. Перезапускаем **Яндекс Браузер**.
+2. Переходим по адресам:
+   * `https://web.au-team.irpo`
+   * `https://docker.au-team.irpo`
+3. Сайты должны открываться защищённым соединением со статусом: **«Сайт использует шифрование по ГОСТу»**.
+
+---
+
+## 5. Решение проблем: ручная привязка сертификата в КриптоПро
+
+> [!WARNING] ВНИМАНИЕ: Если выходит ошибка или предупреждение о ненадёжности!
+> Это означает, что корневой сертификат не подтянулся браузером автоматически. Его необходимо импортировать вручную через утилиту КриптоПро:
+> 1. Открываем: **Меню** → **Инструменты КриптоПро**.
+> 2. Водите курсором мыши (датчик случайных чисел), пока не откроется программа.
+> 3. Перейдите во вкладку: **Сертификаты** → **Установить сертификаты**.
+> 4. Выберите сертификат по пути: `/etc/pki/ca-trust/source/anchors/ca.crt`.
+> 5. Подтвердите установку и заново откройте сайты в Яндекс Браузере.
