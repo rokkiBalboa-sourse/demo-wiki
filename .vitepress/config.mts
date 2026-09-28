@@ -125,7 +125,8 @@ export default defineConfig({
             { text: 'Задание №7: Веб-приложение Apache + MariaDB на сервере HQ-SRV', link: '/module2/task-7' },
             { text: 'Задание №8: Статический проброс портов (DNAT) на роутерах', link: '/module2/task-8' },
             { text: 'Задание №9: Обратный прокси-сервер Nginx на ISP', link: '/module2/task-9' },
-            { text: 'Задание №10: Web-аутентификация в Nginx (.htpasswd)', link: '/module2/task-10' }
+            { text: 'Задание №10: Web-аутентификация в Nginx (.htpasswd)', link: '/module2/task-10' },
+            { text: 'Задание №11: Установка Яндекс Браузера на HQ-CLI', link: '/module2/task-11' }
           ]
         }
       ]
