@@ -115,7 +115,8 @@ export default defineConfig({
           text: 'Модуль №2',
           collapsed: false,
           items: [
-            { text: 'Модуль №2 | Задание', link: '/module2/' }
+            { text: 'Модуль №2 | Задание', link: '/module2/' },
+            { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/module2/task-1' }
           ]
         }
       ]
