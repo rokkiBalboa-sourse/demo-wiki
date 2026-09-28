@@ -14,19 +14,23 @@ description: "Инструкция по переключению репозит�
 
 ---
 
-## 1. Теоретическая справка: репозитории APT в ALT Linux
+## 1. Теоретическая справка: структура репозиториев в ALT Linux
 
 В ALT Linux списки источников пакетов для пакетного менеджера APT хранятся в каталоге `/etc/apt/sources.list.d/`:
 * **`alt.list`** — официальные серверы `ftp.altlinux.org` / `packages.altlinux.org` (активны по умолчанию).
 * **`yandex.list`** — официальное зеркало компании Яндекс `mirror.yandex.ru` (по умолчанию закомментировано знаками `#`).
 
-Для переключения достаточно закомментировать все строки в `alt.list` и раскомментировать рабочие ветки в `yandex.list`.
+### Структура обоих файлов:
+В каждом из этих файлов содержится **ровно 3 блока строк** по 3 строки (для архитектур `x86_64`, `x86_64-i586` и `noarch`):
+1. **1-й блок (`ftp://`)** — доступ по протоколу FTP (закомментирован `#`).
+2. **2-й блок (`http://`)** — стандартный быстрый веб-протокол HTTP (**именно он используется для работы**).
+3. **3-й блок (`rsync://`)** — протокол синхронизации Rsync (закомментирован `#`).
 
 ---
 
 ## 2. Пошаговая инструкция
 
-### Шаг 1. Отключение стандартных репозиториев (alt.list)
+### Шаг 1. Отключение официальных репозиториев (alt.list)
 
 Открываем файл `alt.list` в текстовом редакторе:
 
@@ -34,20 +38,33 @@ description: "Инструкция по переключению репозит�
 nano /etc/apt/sources.list.d/alt.list
 ```
 
-Ставим знак решётки `#` в начале **каждой строки**, чтобы они выглядели следующим образом:
+По умолчанию в файле активен **второй блок из трёх строк** (с протоколом `http://`). Ставим знак решётки `#` в начале этих трёх строк, чтобы **все строки в файле стали закомментированными**:
 
 ```text
-# rpm [alt] http://ftp.altlinux.org/pub/distributions/ALTLinux/p10/branch x86_64 classic
-# rpm [alt] http://ftp.altlinux.org/pub/distributions/ALTLinux/p10/branch noarch classic
-# rpm [alt] http://ftp.altlinux.org/pub/distributions/ALTLinux/p10/branch x86_64-i586 classic
+# ftp.altlinux.org (ALT Linux, Moscow)
+
+# ALT Platform 10
+#rpm [p10] ftp://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic
+#rpm [p10] ftp://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic
+#rpm [p10] ftp://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic
+
+#rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic
+#rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic
+#rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic
+
+#rpm [p10] rsync://ftp.altlinux.org/ALTLinux p10/branch/x86_64 classic
+#rpm [p10] rsync://ftp.altlinux.org/ALTLinux p10/branch/x86_64-i586 classic
+#rpm [p10] rsync://ftp.altlinux.org/ALTLinux p10/branch/noarch classic
 ```
 
 Сохраняем изменения (`Ctrl + O`, `Enter`, `Ctrl + X`).
 
-> [!TIP] Быстрая команда для ленивых (в одну строчку)
-> Закомментировать все незакомментированные строки в файле можно одной командой:
+![Файл alt.list](/images/alt-list.png)
+
+> [!TIP] Быстрая команда в одну строчку
+> Закомментировать активный второй блок можно одной командой без открытия редактора:
 > ```bash
-> sed -i 's/^rpm/# rpm/' /etc/apt/sources.list.d/alt.list
+> sed -i 's/^rpm/#rpm/' /etc/apt/sources.list.d/alt.list
 > ```
 
 ---
@@ -60,19 +77,30 @@ nano /etc/apt/sources.list.d/alt.list
 nano /etc/apt/sources.list.d/yandex.list
 ```
 
-В файле присутствуют два блока строк. Находим **вторые 3 строки** и убираем знаки `#` в начале строк (раскомментируем их):
+В файле также находятся 3 блока по 3 строки, и все они изначально закомментированы. 
+
+Находим **второй блок (3 строки с протоколом `http://`)** и убираем знаки `#` в начале этих трёх строк (раскомментируем их):
 
 ```text
-# rpm [yandex] ftp://mirror.yandex.ru/altlinux/p10/branch x86_64 classic
-# rpm [yandex] ftp://mirror.yandex.ru/altlinux/p10/branch noarch classic
-# rpm [yandex] ftp://mirror.yandex.ru/altlinux/p10/branch x86_64-i586 classic
+# mirror.yandex.ru (Yandex, Moscow)
 
-rpm [yandex] http://mirror.yandex.ru/altlinux/p10/branch x86_64 classic
-rpm [yandex] http://mirror.yandex.ru/altlinux/p10/branch noarch classic
-rpm [yandex] http://mirror.yandex.ru/altlinux/p10/branch x86_64-i586 classic
+# ALT Platform 10
+#rpm [p10] ftp://mirror.yandex.ru/altlinux p10/branch/x86_64 classic
+#rpm [p10] ftp://mirror.yandex.ru/altlinux p10/branch/x86_64-i586 classic
+#rpm [p10] ftp://mirror.yandex.ru/altlinux p10/branch/noarch classic
+
+rpm [p10] http://mirror.yandex.ru/altlinux p10/branch/x86_64 classic
+rpm [p10] http://mirror.yandex.ru/altlinux p10/branch/x86_64-i586 classic
+rpm [p10] http://mirror.yandex.ru/altlinux p10/branch/noarch classic
+
+#rpm [p10] rsync://mirror.yandex.ru/altlinux p10/branch/x86_64 classic
+#rpm [p10] rsync://mirror.yandex.ru/altlinux p10/branch/x86_64-i586 classic
+#rpm [p10] rsync://mirror.yandex.ru/altlinux p10/branch/noarch classic
 ```
 
 Сохраняем изменения (`Ctrl + O`, `Enter`, `Ctrl + X`).
+
+![Файл yandex.list](/images/yandex-list.png)
 
 ---
 
@@ -88,14 +116,14 @@ apt-get update
 ```text
 Reading Package Lists... Done
 Building Dependency Tree... Done
-Get:1 http://mirror.yandex.ru/altlinux/p10/branch/x86_64 release [1234 B]
-Get:2 http://mirror.yandex.ru/altlinux/p10/branch/noarch release [1234 B]
+Get:1 http://mirror.yandex.ru/altlinux p10/branch/x86_64 release [1234 B]
+Get:2 http://mirror.yandex.ru/altlinux p10/branch/noarch release [1234 B]
 Fetched 2468 B in 1s (2468 B/s)
 Reading Package Lists... Done
 Building Dependency Tree... Done
 ```
 
-Если чтение списков пакетов завершилось словом **`Done`** без ошибок подключения к сети — репозитории успешно переключены на зеркало Яндекс!
+Если чтение списков пакетов завершилось словом **`Done`** без сообщений об ошибках (`Err` / `Failed to fetch`) — репозитории успешно переключены на быстрое зеркало Яндекс!
 
 ---
 
@@ -106,9 +134,9 @@ Building Dependency Tree... Done
    ping ya.ru -c 2
    ping mirror.yandex.ru -c 2
    ```
-   Если пинг не идёт, проверьте `/etc/resolv.conf` — в нём должен быть указан рабочий DNS-сервер (например, `nameserver 77.88.8.8`).
+   Если имя `mirror.yandex.ru` не разрешается, проверьте файл `/etc/resolv.conf` — в нём должен быть указан рабочий DNS-сервер (например, `nameserver 77.88.8.8`).
 2. **Проверьте шлюз по умолчанию (Default Gateway)**:
    ```bash
    ip r
    ```
-   В выводе должна присутствовать строка `default via ...`.
+   В выводе обязательно должна присутствовать строка основного маршрута: `default via ...`.
