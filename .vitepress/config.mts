@@ -44,9 +44,15 @@ export default defineConfig({
 
     nav: [
       { text: 'Главная', link: '/' },
-      { text: 'Модуль 1', link: '/module1/' },
-      { text: 'Модуль 2', link: '/module2/' },
-      { text: 'Модуль 3', link: '/module3/' }
+      {
+        text: '2026',
+        items: [
+          { text: 'Обзор 2026 года', link: '/2026/' },
+          { text: 'Модуль 1', link: '/module1/' },
+          { text: 'Модуль 2', link: '/module2/' },
+          { text: 'Модуль 3', link: '/module3/' }
+        ]
+      }
     ],
 
     sidebar: {
@@ -87,6 +93,18 @@ export default defineConfig({
           text: 'Частые вопросы',
           items: [
             { text: 'Общие вопросы (FAQ)', link: '/faq' }
+          ]
+        }
+      ],
+      '/2026/': [
+        {
+          text: 'Задания 2026 года',
+          collapsed: false,
+          items: [
+            { text: 'Обзор 2026 года', link: '/2026/' },
+            { text: 'Модуль №1', link: '/module1/' },
+            { text: 'Модуль №2', link: '/module2/' },
+            { text: 'Модуль №3', link: '/module3/' }
           ]
         }
       ],

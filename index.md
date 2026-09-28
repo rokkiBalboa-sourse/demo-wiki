@@ -9,13 +9,7 @@ hero:
     src: /logo.png
     alt: demo-wiki Logo
   actions:
-    - theme: alt
-      text: Модуль №1
-      link: /module1/
-    - theme: alt
-      text: Модуль №2
-      link: /module2/
-    - theme: alt
-      text: Модуль №3
-      link: /module3/
+    - theme: brand
+      text: "2026"
+      link: /2026/
 ---
