@@ -46,6 +46,7 @@ export default defineConfig({
       { text: 'Главная', link: '/' },
       { text: 'Модуль 1', link: '/module1/' },
       { text: 'Модуль 2', link: '/module2/' },
+      { text: 'Модуль 3', link: '/module3/' },
       { text: 'Админка', link: '/admin/index.html', target: '_blank' }
     ],
 
@@ -129,6 +130,26 @@ export default defineConfig({
             { text: 'Задание №9: Обратный прокси-сервер Nginx на ISP', link: '/module2/task-9' },
             { text: 'Задание №10: Web-аутентификация в Nginx (.htpasswd)', link: '/module2/task-10' },
             { text: 'Задание №11: Установка Яндекс Браузера на HQ-CLI', link: '/module2/task-11' }
+          ]
+        }
+      ],
+      '/module3/': [
+        {
+          text: 'Модуль №3',
+          collapsed: false,
+          items: [
+            { text: 'Модуль №3 | Задание', link: '/module3/' },
+            { text: 'Задание №0: Настройка источников пакетов', link: '/module3/task-0' },
+            { text: 'Задание №1: Импорт пользователей в домен Samba DC', link: '/module3/task-1' },
+            { text: 'Задание №2: Центр сертификации ГОСТ и HTTPS Nginx', link: '/module3/task-2' },
+            { text: 'Задание №3: Защищённый IP-туннель и OSPF', link: '/module3/task-3' },
+            { text: 'Задание №4: Межсетевой экран nftables', link: '/module3/task-4' },
+            { text: 'Задание №5: Принт-сервер CUPS и PDF-принтер', link: '/module3/task-5' },
+            { text: 'Задание №6: Централизованное логирование rsyslog', link: '/module3/task-6' },
+            { text: 'Задание №7: Мониторинг устройств на HQ-SRV', link: '/module3/task-7' },
+            { text: 'Задание №8: Инвентаризация Ansible (PC-INFO)', link: '/module3/task-8' },
+            { text: 'Задание №9: Защита SSH с помощью Fail2ban', link: '/module3/task-9' },
+            { text: 'Задание №10: Резервное копирование данных', link: '/module3/task-10' }
           ]
         }
       ]
