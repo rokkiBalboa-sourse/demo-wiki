@@ -116,7 +116,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Модуль №2 | Задание', link: '/module2/' },
-            { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/module2/task-1' }
+            { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/module2/task-1' },
+            { text: 'Задание №2: Файловое хранилище RAID 0 на сервере HQ-SRV', link: '/module2/task-2' },
+            { text: 'Задание №3: Сетевая файловая система NFS на HQ-SRV и HQ-CLI', link: '/module2/task-3' }
           ]
         }
       ]
