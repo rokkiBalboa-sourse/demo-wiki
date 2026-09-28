@@ -1,40 +1,21 @@
 ---
-title: "Задание №6: Централизованный сбор логов rsyslog на HQ-SRV и ротация logrotate"
-description: "Настройка централизованного сервера сбора системных журналов rsyslog на HQ-SRV для узлов HQ-RTR, BR-RTR и BR-SRV с фильтрацией по приоритету warning, разделением по поддиректориям в /opt и ротацией через logrotate"
+title: "Задание №6: Централизованное логирование rsyslog и ротация logrotate"
+description: "Пошаговая настройка отправки журналов с приоритетом warning через rsyslog и systemd-journald с узлов HQ-RTR, BR-RTR и BR-SRV на сервер HQ-SRV, распределение по каталогам /opt/<HOSTNAME>/ и еженедельная ротация через logrotate и crontab"
 ---
 
-# Задание №6: Централизованный сбор логов rsyslog на HQ-SRV и ротация logrotate
+# Задание №6: Централизованное логирование rsyslog и ротация logrotate
 
-В данном задании на сервере главного офиса (**HQ-SRV**) организуется централизованный сервер сбора системных журналов на базе демона **rsyslog**. 
+В данном задании на сервере главного офиса (**HQ-SRV**) настраивается централизованный приём системных журналов с помощью **rsyslog**. 
 
-Сетевые маршрутизаторы **HQ-RTR**, **BR-RTR** и сервер филиала **BR-SRV** настраиваются на отправку сообщений с уровнем важности **не ниже `warning`**. Все поступающие журналы автоматически распределяются по поддиректориям в каталоге `/opt` в соответствии с именем отправляющего хоста (`/opt/<HOSTNAME>/`). Сам сервер `HQ-SRV` не отправляет логи самому себе по сети. На сервере также настраивается автоматическая еженедельная ротация и архивация журналов через **logrotate** при достижении размера 10 МБ.
+На клиентских узлах (**HQ-RTR**, **BR-RTR**, **BR-SRV**) включается пересылка событий из `systemd-journald` в `rsyslog` с фильтром важности не ниже `warning` (`*.warn`). Приходящие логи на сервере автоматически сохраняются в поддиректории `/opt/%HOSTNAME%/`. Сам сервер `HQ-SRV` изолирован от записи собственных логов в эти каталоги (отключен модуль `imuxsock`). Для архивации журналов настраивается **logrotate** с еженедельным запуском через планировщик **cron**.
 
-> [!IMPORTANT] Где выполнять
-> 1. **HQ-SRV** — настройка приёма логов по сети в rsyslog, шаблона каталогов `/opt/%HOSTNAME%/` и файла ротации `/etc/logrotate.d/remote-opt`.
-> 2. **HQ-RTR**, **BR-RTR**, **BR-SRV** — настройка отправки журналов с приоритетом `*.warning` на сервер `HQ-SRV`.
-
----
-
-## 1. Теоретическая справка: уровни важности Syslog и шаблоны rsyslog
-
-Протокол Syslog классифицирует сообщения по двум осям: источнику (**Facility**, например, `auth`, `cron`, `daemon`, `kern`, `user`) и степени важности (**Severity**):
-
-| Числовой код | Уровень (Severity) | Описание | Попадает под условие `>= warning`? |
-| :---: | :--- | :--- | :---: |
-| 0 | `emerg` (Emergency) | Система неработоспособна | ДА |
-| 1 | `alert` | Требуется немедленное вмешательство | ДА |
-| 2 | `crit` (Critical) | Критическая ошибка | ДА |
-| 3 | `err` (Error) | Ошибка выполнения программы | ДА |
-| 4 | **`warning`** | **Предупреждение о потенциальном сбое** | **ДА (порог)** |
-| 5 | `notice` | Обычное штатное событие | НЕТ |
-| 6 | `info` | Информационное сообщение | НЕТ |
-| 7 | `debug` | Отладочные сведения | НЕТ |
-
-Синтаксис `*.warning` означает: перехватывать все сообщения любых источников с важностью от `warning` до `emerg`.
+> [!IMPORTANT] Узлы выполнения
+> 1. **HQ-RTR**, **BR-RTR**, **BR-SRV** — настройка клиентов rsyslog и journald, пересылка на `192.168.1.10`.
+> 2. **HQ-SRV** — установка `rsyslog-server-listen`, отключение `imuxsock`, настройка шаблона `/opt/` и ротации `logrotate`.
 
 ---
 
-## 2. Памятка по работе в Vim
+## 1. Памятка по работе в Vim
 
 ::: tip Памятка по работе в Vim
 * **Вход в режим редактирования**: нажмите клавишу `i`.
@@ -44,143 +25,191 @@ description: "Настройка централизованного сервер
 
 ---
 
+## 2. Настройка клиентов логирования (HQ-RTR, BR-RTR, BR-SRV)
+
+Выполните следующие шаги под пользователем `root` на каждом из трёх устройств (**BR-SRV**, **HQ-RTR** и **BR-RTR**):
+
+### Шаг 1. Установка rsyslog и проверка параметров journald
+
+```bash
+apt-get update && apt-get install rsyslog -y
+
+grep 'Syslog' /etc/systemd/journald.conf
+```
+
+---
+
+### Шаг 2. Активация модулей в rsyslog
+
+Открываем файл конфигурации:
+
+```bash
+vim /etc/rsyslog.d/00_common.conf
+```
+
+Находим и **раскомментируем** (убираем `#` в начале) следующие строки:
+
+```text
+module(load="imjournal")
+module(load="imuxsock")
+```
+
+Сохраняем файл (`Esc` → `:wq` → `Enter`).
+
+---
+
+### Шаг 3. Настройка пересылки journald и создание правила отправки
+
+Включаем форвардинг событий уровня `warning` из journald в syslog:
+
+```bash
+echo -e "ForwardToSyslog=yes\nMaxLevelSyslog=warning" >> /etc/systemd/journald.conf
+```
+
+Создаём правило отправки сообщений с приоритетом `warning` и выше на IP-адрес сервера HQ-SRV (`192.168.1.10`):
+
+```bash
+echo "*.warn @192.168.1.10" > /etc/rsyslog.d/10_to_server.conf
+```
+
+---
+
+### Шаг 4. Перезапуск служб
+
+```bash
+systemctl restart systemd-journald
+systemctl enable --now rsyslog
+```
+
+---
+
 ## 3. Настройка сервера сбора логов на HQ-SRV
 
 Выполните действия под пользователем `root` на сервере **HQ-SRV**:
 
-### Шаг 1. Установка и проверка rsyslog
+### Шаг 1. Установка серверных компонентов rsyslog
+
 ```bash
-apt-get update && apt-get install rsyslog logrotate -y
+apt-get update && apt-get install rsyslog-classic rsyslog-server-listen -y
 ```
 
 ---
 
-### Шаг 2. Настройка приёма удалённых логов и шаблона сохранения в /opt
+### Шаг 2. Создание шаблона динамического распределения логов по папкам
 
-Открываем конфигурационный файл rsyslog:
+Создаём файл `/etc/rsyslog.d/91_template.conf`:
 
 ```bash
-vim /etc/rsyslog.d/remote-server.conf
+cat << "EOF" > /etc/rsyslog.d/91_template.conf
+$template DynFile,"/opt/%HOSTNAME%/%PROGRAMNAME%.log"
+*.* ?DynFile
+& stop
+EOF
 ```
 
-Вставьте следующую конфигурацию:
+---
+
+### Шаг 3. Изоляция сервера (отключение локального сокета imuxsock)
+
+Чтобы сервер `HQ-SRV` не записывал собственные локальные логи в директории `/opt/`:
+
+```bash
+vim /etc/rsyslog.d/10_classic.conf
+```
+
+Находим строку с загрузкой модуля `imuxsock` и **закомментируем** её знаком `#`:
 
 ```text
-# Загрузка сетевых модулей приёма логов (UDP порт 514)
-module(load="imudp")
-input(type="imudp" port="514")
-
-# Шаблон пути: /opt/<ИМЯ_МАШИНЫ>/syslog.log
-template(name="RemoteDeviceLogs" type="string" string="/opt/%HOSTNAME%/%PROGRAMNAME%.log")
-
-# Правило: если сообщение пришло НЕ от локального хоста и важность >= warning,
-# записываем в подкаталог устройства в /opt и останавливаем дальнейшую обработку
-if ($fromhost-ip != '127.0.0.1' and $syslogseverity <= 4) then {
-    action(type="omfile" dirmode="0755" filemode="0644" DynaFile="RemoteDeviceLogs")
-    stop
-}
+#module(load="imuxsock")
 ```
 
-Создаём базовый каталог `/opt` и перезапускаем службу:
+Сохраняем файл (`Esc` → `:wq` → `Enter`).
+
+Перезапускаем службу rsyslog:
+
 ```bash
-mkdir -p /opt
-systemctl enable --now rsyslog
-systemctl restart rsyslog
+systemctl restart rsyslogd
 ```
 
 ---
 
-### Шаг 3. Настройка ротации логов в /etc/logrotate.d/
+## 4. Проверка сбора логов на сервере HQ-SRV
 
-Создаём файл конфигурации ротации `/etc/logrotate.d/opt-logs`:
-
-```bash
-vim /etc/logrotate.d/opt-logs
-```
-
-Вносим параметры согласно заданию (еженедельно, сжатие, порог от 10 МБ):
-
-```text
-/opt/*/*.log {
-    weekly
-    compress
-    minisize 10M
-    missingok
-    notifempty
-    sharedscripts
-    postrotate
-        /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
-    endscript
-}
-```
-
-Проверяем синтаксис logrotate в режиме отладки:
-```bash
-logrotate -d /etc/logrotate.d/opt-logs
-```
-
----
-
-## 4. Настройка отправки логов на клиентах (HQ-RTR, BR-RTR, BR-SRV)
-
-Выполните следующие шаги на каждом из трёх узлов (**HQ-RTR**, **BR-RTR**, **BR-SRV**) под пользователем `root`:
-
-### Шаг 1. Создание конфигурации отправки логов
-Открываем файл `/etc/rsyslog.d/forward-hq-srv.conf`:
-
-```bash
-vim /etc/rsyslog.d/forward-hq-srv.conf
-```
-
-Вставляем директиву отправки сообщений уровня `warning` и выше на IP-адрес `HQ-SRV` (`192.168.1.10`):
-
-```text
-*.warning @192.168.1.10:514
-```
-
-> [!NOTE] Формат отправки
-> Символ `@` означает отправку по протоколу UDP (порт 514).
-
-### Шаг 2. Перезапуск службы rsyslog
-```bash
-systemctl restart rsyslog
-```
-
----
-
-## 5. Проверка работы логирования
-
-1. **Генерация тестовых событий на клиентских машинах**:
-   
-   На **HQ-RTR**:
+1. **Генерация тестового сообщения**:
+   На хостах **HQ-RTR**, **BR-RTR** и **BR-SRV** выполните:
    ```bash
-   logger -p user.warning "HQ-RTR: Тестовое предупреждение для проверки rsyslog"
+   logger -p local2.warning "Syslog test message"
    ```
 
-   На **BR-RTR**:
+2. **Проверка получения на HQ-SRV**:
+   На сервере **HQ-SRV** проверьте каталог `/opt`:
    ```bash
-   logger -p user.err "BR-RTR: Тестовое сообщение об ошибке"
+   ls -l /opt
    ```
-
-   На **BR-SRV**:
-   ```bash
-   logger -p daemon.warning "BR-SRV: Тестовое сервисное предупреждение"
-   ```
-
-2. **Проверка получения логов на сервере HQ-SRV**:
-   
-   Возвращаемся на **HQ-SRV** и проверяем структуру каталогов:
-   ```bash
-   ls -la /opt/
-   ```
-   В директории `/opt` должны автоматически появиться подпапки для каждого устройства:
+   В выводе должны появиться директории с именами устройств:
    ```text
-   /opt/HQ-RTR/
-   /opt/BR-RTR/
-   /opt/BR-SRV/
+   drwxr-xr-x 2 root root 4096 Sep 29 00:00 BR-RTR
+   drwxr-xr-x 2 root root 4096 Sep 29 00:00 BR-SRV
+   drwxr-xr-x 2 root root 4096 Sep 29 00:00 HQ-RTR
    ```
 
-   Просматриваем содержимое журнала:
-   ```bash
-   cat /opt/HQ-RTR/*.log
-   ```
+---
+
+## 5. Настройка ротации логов (logrotate) на HQ-SRV
+
+Выполните команды под пользователем `root` на **HQ-SRV**:
+
+### Шаг 1. Установка logrotate и создание правила ротации
+
+```bash
+apt-get install logrotate -y
+
+cat << "EOF" > /etc/logrotate.d/rsyslog
+/opt/**/*.log
+{ 
+weekly
+missingok
+notifempty 
+compress 
+minsize 10M
+} 
+EOF
+```
+
+::: tip Разбор параметров ротации
+* **`/opt/**/*.log`** — ротация затрагивает все лог-файлы во всех подкаталогах директории `/opt/`.
+* **`weekly`** — ротация производится один раз в неделю.
+* **`missingok`** — отсутствие файла не вызывает ошибку.
+* **`notifempty`** — пустые файлы не ротируются.
+* **`compress`** — сжатие ротированных архивов.
+* **`minsize 10M`** — минимальный размер для запуска ротации составляет 10 МБ.
+:::
+
+---
+
+### Шаг 2. Тестовый запуск ротации
+
+Проверяем корректность конфигурации в режиме сухой проверки (dry-run):
+
+```bash
+logrotate -d /etc/logrotate.d/rsyslog
+```
+
+---
+
+### Шаг 3. Добавление задания в планировщик cron
+
+Задаём редактор по умолчанию `vim` и открываем расписание задач:
+
+```bash
+export EDITOR=/usr/bin/vim
+crontab -e
+```
+
+В конец файла добавляем задание запуска ротации каждое воскресенье в 00:00:
+
+```text
+0 0 * * 0 /usr/sbin/logrotate /etc/logrotate.d/rsyslog
+```
+
+Сохраняем и выходим (`Esc` → `:wq` → `Enter`). Задание настроено!
