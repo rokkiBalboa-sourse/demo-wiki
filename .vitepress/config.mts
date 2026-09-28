@@ -96,6 +96,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Модуль №1 | Задание', link: '/module1/' },
+            { text: 'Задание №0: Настройка источников пакетов', link: '/module1/task-0' },
             { text: 'Задание №1: Базовая настройка сети и хостов', link: '/module1/task-1' },
             { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/module1/task-2' },
             { text: 'Задание №3: Локальные учётные записи и sudo', link: '/module1/task-3' },
@@ -116,6 +117,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Модуль №2 | Задание', link: '/module2/' },
+            { text: 'Задание №0: Настройка источников пакетов', link: '/module2/task-0' },
             { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/module2/task-1' },
             { text: 'Задание №2: Файловое хранилище RAID 0 на сервере HQ-SRV', link: '/module2/task-2' },
             { text: 'Задание №3: Сетевая файловая система NFS на HQ-SRV и HQ-CLI', link: '/module2/task-3' },
