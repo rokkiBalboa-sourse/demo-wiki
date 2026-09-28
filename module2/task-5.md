@@ -162,30 +162,18 @@ ansible all -m ping
 
 ```text
 HQ-SRV | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/bin/python3"
-    },
     "changed": false,
     "ping": "pong"
 }
 HQ-RTR | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/bin/python3"
-    },
     "changed": false,
     "ping": "pong"
 }
 BR-RTR | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/bin/python3"
-    },
     "changed": false,
     "ping": "pong"
 }
 HQ-CLI | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/bin/python3"
-    },
     "changed": false,
     "ping": "pong"
 }

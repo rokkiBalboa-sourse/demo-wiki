@@ -120,7 +120,8 @@ export default defineConfig({
             { text: 'Задание №2: Файловое хранилище RAID 0 на сервере HQ-SRV', link: '/module2/task-2' },
             { text: 'Задание №3: Сетевая файловая система NFS на HQ-SRV и HQ-CLI', link: '/module2/task-3' },
             { text: 'Задание №4: Служба сетевого времени Chrony на ISP', link: '/module2/task-4' },
-            { text: 'Задание №5: Автоматизация с Ansible на сервере BR-SRV', link: '/module2/task-5' }
+            { text: 'Задание №5: Автоматизация с Ansible на сервере BR-SRV', link: '/module2/task-5' },
+            { text: 'Задание №6: Веб-приложение в Docker на сервере BR-SRV', link: '/module2/task-6' }
           ]
         }
       ]
