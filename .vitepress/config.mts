@@ -95,18 +95,18 @@ export default defineConfig({
           text: 'Модуль №1',
           collapsed: false,
           items: [
-            { text: 'Задание Модуля №1', link: '/module1/' },
-            { text: 'Задание 1: Сеть и хосты', link: '/module1/task-1' },
-            { text: 'Задание 2: Доступ в Интернет (ISP)', link: '/module1/task-2' },
-            { text: 'Задание 3: Пользователи и sudo', link: '/module1/task-3' },
-            { text: 'Задание 4: Коммутация и VLAN (Proxmox)', link: '/module1/task-4' },
-            { text: 'Задание 5: Безопасный SSH', link: '/module1/task-5' },
-            { text: 'Задание 6: IP-туннель (GRE)', link: '/module1/task-6' },
-            { text: 'Задание 7: Маршрутизация OSPF (FRR)', link: '/module1/task-7' },
-            { text: 'Задание 8: Трансляция адресов (NAT)', link: '/module1/task-8' },
-            { text: 'Задание 9: Сервер DHCP (dnsmasq)', link: '/module1/task-9' },
-            { text: 'Задание 10: Служба DNS (BIND 9)', link: '/module1/task-10' },
-            { text: 'Задание 11: Часовой пояс (timedatectl)', link: '/module1/task-11' }
+            { text: 'Модуль №1 | Задание', link: '/module1/' },
+            { text: 'Задание №1: Базовая настройка сети и хостов', link: '/module1/task-1' },
+            { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/module1/task-2' },
+            { text: 'Задание №3: Локальные учётные записи и sudo', link: '/module1/task-3' },
+            { text: 'Задание №4: Коммутация и сегментация VLAN в сегменте HQ', link: '/module1/task-4' },
+            { text: 'Задание №5: Безопасный удаленный доступ (SSH)', link: '/module1/task-5' },
+            { text: 'Задание №6: Межофисный защищенный IP-туннель (GRE)', link: '/module1/task-6' },
+            { text: 'Задание №7: Динамическая маршрутизация Link-State (OSPF в FRR)', link: '/module1/task-7' },
+            { text: 'Задание №8: Динамическая трансляция адресов (NAT) на филиалах', link: '/module1/task-8' },
+            { text: 'Задание №9: Настройка DHCP-сервера для клиентов (HQ-CLI)', link: '/module1/task-9' },
+            { text: 'Задание №10: Инфраструктура службы доменных имён (DNS BIND)', link: '/module1/task-10' },
+            { text: 'Задание №11: Настройка системного времени и часового пояса', link: '/module1/task-11' }
           ]
         }
       ],
@@ -115,7 +115,7 @@ export default defineConfig({
           text: 'Модуль №2',
           collapsed: false,
           items: [
-            { text: 'Задание Модуля №2', link: '/module2/' }
+            { text: 'Модуль №2 | Задание', link: '/module2/' }
           ]
         }
       ]
