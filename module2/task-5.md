@@ -1,0 +1,191 @@
+---
+title: "Задание №5: Автоматизация с Ansible на сервере BR-SRV"
+description: "Пошаговая настройка управляющего узла Ansible на BR-SRV в ALT Linux: включение SSH на целевых узлах, установка sshpass, отключение host_key_checking, инвентарь hosts с портами 2026 и проверка доступности хостов через модуль ping"
+---
+
+# Задание №5: Автоматизация с Ansible на сервере BR-SRV
+
+В данном задании на сервере филиала (**BR-SRV**) развёртывается система управления конфигурациями **Ansible**. 
+
+Сервер `BR-SRV` выступает управляющим узлом (**Control Node**). На нём формируется инвентарный файл со всеми ключевыми машинами инфраструктуры (**HQ-SRV**, **HQ-CLI**, **HQ-RTR**, **BR-RTR**), задаются параметры подключения по нестандартному порту SSH `2026`, и проверяется доступность узлов без интерактивных запросов паролей и отпечатков ключей.
+
+> [!IMPORTANT] Место выполнения
+> * Основные действия выполняются под пользователем `root` на сервере **BR-SRV** (`br-srv.au-team.irpo`).
+> * Предварительно на целевых узлах **HQ-RTR**, **BR-RTR** и **HQ-CLI** активируется служба OpenSSH на порту `2026`.
+
+---
+
+## 1. Теоретическая справка: безагентная архитектура Ansible
+
+**Ansible** — популярная система управления конфигурациями и оркестрации, построенная по **безагентной (Agentless)** архитектуре:
+* На управляемые узлы (Managed Nodes) не требуется устанавливать специальные службы или фоновые демоны.
+* Всё управление происходит по стандартному протоколу **SSH** с передачей модулей на языке Python.
+* В качестве инвентаря используется простой текстовый файл `/etc/ansible/hosts`, где перечисляются целевые хосты и переменные подключения (`ansible_user`, `ansible_password`, `ansible_port`).
+
+### Зачем нужен пакет `sshpass`?
+По умолчанию клиент SSH требует интерактивного ввода пароля с клавиатуры (TTY). Утилита **`sshpass`** позволяет Ansible передавать пароль в сессию SSH в автоматическом неинтерактивном режиме без необходимости предварительной ручной генерации и копирования SSH-ключей (`ssh-copy-id`).
+
+### Параметры конфигурационного файла `ansible.cfg`:
+* `host_key_checking = False` — **отключает проверку отпечатков SSH-ключей** (`Host Key Checking`). Предотвращает появление интерактивного диалога `Are you sure you want to continue connecting (yes/no)?`, который привёл бы к зависанию автоматических задач.
+* `interpreter_python = /usr/bin/python3` — явно задаёт интерпретатор Python на целевых машинах, подавляя предупреждения автопоиска (`Python discovery warning`).
+* `inventory = /etc/ansible/hosts` — путь к файлу инвентаря по умолчанию.
+
+---
+
+## 2. Предварительные требования: включение SSH на узлах HQ-RTR, BR-RTR и HQ-CLI
+
+::: tip Важное примечание для участников
+В Модуле №1 безопасный SSH настраивался только на серверах. Чтобы система Ansible смогла подключиться к маршрутизаторам и клиентской машине, **необходимо самостоятельно включить SSH-доступ на машинах HQ-RTR, BR-RTR и HQ-CLI**.
+:::
+
+Выполните следующие действия на машинах **HQ-RTR**, **BR-RTR** и **HQ-CLI** под пользователем `root`:
+
+```bash
+# 1. Открываем конфигурационный файл демона OpenSSH в ALT Linux
+vim /etc/openssh/sshd_config
+```
+
+Добавляем одну строчку в самое начало файла:
+```text
+Port 2026
+```
+
+Затем запускаем и перезапускаем службу:
+```bash
+# 2. Включаем автозапуск и перезапускаем службу sshd
+systemctl enable --now sshd
+systemctl restart sshd
+```
+
+> [!TIP] Быстрая команда в одну строчку
+> Вместо ручного редактирования файла в редакторе можно выполнить команду:
+> ```bash
+> sed -i '1i Port 2026' /etc/openssh/sshd_config && systemctl enable --now sshd && systemctl restart sshd
+> ```
+
+---
+
+## 3. Настройка управляющего узла на сервере BR-SRV
+
+Все дальнейшие действия выполняются на **BR-SRV** под пользователем `root`:
+
+### Шаг 1. Установка Ansible и вспомогательной утилиты sshpass
+
+```bash
+# Обновляем кэш пакетов и устанавливаем ansible вместе с sshpass:
+apt-get update && apt-get install ansible sshpass -y
+```
+
+---
+
+### Шаг 2. Создание файла глобальной конфигурации /etc/ansible/ansible.cfg
+
+Сохраняем резервную копию и создаём чистый файл конфигурации:
+
+```bash
+# Делаем резервную копию исходного файла (если он существовал)
+cp -r /etc/ansible/ansible.cfg /etc/ansible/ansible.cfg.back
+
+# Удаляем старый файл конфигурации
+rm -rf /etc/ansible/ansible.cfg
+
+# Создаём новый конфигурационный файл
+nano /etc/ansible/ansible.cfg
+```
+
+Вставляем следующее содержимое:
+
+```ini
+[defaults]
+
+host_key_checking = False
+interpreter_python=/usr/bin/python3
+inventory       = /etc/ansible/hosts
+```
+
+---
+
+### Шаг 3. Формирование файла инвентаря /etc/ansible/hosts
+
+Открываем файл инвентаря:
+
+```bash
+nano /etc/ansible/hosts
+```
+
+Вносим параметры подключения для каждого узла:
+
+```text
+HQ-SRV ansible_user=user ansible_password=resu ansible_port=2026
+HQ-RTR ansible_user=net_admin ansible_password=P@ssw0rd ansible_port=2026
+BR-RTR ansible_user=net_admin ansible_password=P@ssw0rd ansible_port=2026
+HQ-CLI ansible_user=user ansible_password=resu ansible_port=2026
+```
+
+**Разбор параметров инвентаря:**
+* Имена хостов (`HQ-SRV`, `HQ-RTR`, `BR-RTR`, `HQ-CLI`) разрешаются через DNS домена `au-team.irpo` или системный файл `/etc/hosts`.
+* `ansible_user` и `ansible_password` — учетные записи пользователей, настроенные в Модуле №1 (для серверов/клиентов — `user:resu`, для маршрутизаторов — `net_admin:P@ssw0rd`).
+* `ansible_port=2026` — порт службы OpenSSH, защищённый в Модуле №1 и предварительно включённый на узлах.
+
+---
+
+## 4. Проверка доступности хостов через Ansible
+
+Запускаем встроенный ad-hoc модуль `ping` для всех хостов из инвентаря:
+
+```bash
+ansible all -m ping
+```
+
+**Что делает команда:**
+* `all` — цель (все хосты из файла инвентаря).
+* `-m ping` — вызов модуля `ping` (Ansible подключается по SSH, проверяет наличие Python и возвращает ответ `pong`). Это **не ICMP-пинг**, а полноценная проверка работоспособности SSH и авторизации!
+
+### Пример ожидаемого вывода:
+
+```text
+HQ-SRV | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+HQ-RTR | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+BR-RTR | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+HQ-CLI | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+```
+
+Все 4 машины должны вернуть статус **`SUCCESS`** и значение **`"ping": "pong"`** зелёным цветом без ошибок и предупреждений!
+
+---
+
+## 5. Возможные проблемы и диагностика (Troubleshooting)
+
+| Ошибка | Причина | Способ решения |
+| :--- | :--- | :--- |
+| `Could not resolve hostname` | Имя хоста не преобразуется в IP-адрес | Проверьте `/etc/resolv.conf` (должен быть IP контроллера домена Samba DC `127.0.0.1` или `192.168.3.10`) либо добавьте сопоставление в `/etc/hosts`. |
+| `Permission denied (publickey,password)` | Неверный логин или пароль | Проверьте учетные данные в строке инвентаря: для роутеров `net_admin:P@ssw0rd`, для серверов `user:resu`. |
+| `Connection refused` | Порт SSH закрыт или недоступен | Проверьте, добавлен ли `Port 2026` в `/etc/openssh/sshd_config` и запущен ли демон `sshd` на целевом узле (`systemctl status sshd`). |
+| `to use the 'ssh' connection type with passwords, you must install the sshpass program` | Не установлена утилита `sshpass` | Выполните `apt-get install sshpass -y` на управляющем узле `BR-SRV`. |
+
+> [!NOTE] Итог выполнения Задания №5
+> Управляющий узел Ansible на `BR-SRV` полностью настроен и готов к автоматизированному управлению инфраструктурой без запроса ключей и паролей.
