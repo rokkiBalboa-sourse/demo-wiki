@@ -47,10 +47,10 @@ export default defineConfig({
       {
         text: '2026',
         items: [
-          { text: 'Обзор 2026 года', link: '/2026/' },
-          { text: 'Модуль 1', link: '/2026/module1/' },
-          { text: 'Модуль 2', link: '/2026/module2/' },
-          { text: 'Модуль 3', link: '/2026/module3/' }
+          { text: '📋 Обзор 2026 года', link: '/2026/' },
+          { text: '🌐 Модуль №1: Сетевая инфраструктура', link: '/2026/module1/' },
+          { text: '🏢 Модуль №2: Службы каталога и сервисы', link: '/2026/module2/' },
+          { text: '🔒 Модуль №3: Безопасность и администрирование', link: '/2026/module3/' }
         ]
       }
     ],
@@ -58,20 +58,14 @@ export default defineConfig({
     sidebar: {
       '/2026/': [
         {
-          text: 'Задания 2026 года',
-          collapsed: false,
+          text: '📋 Демоэкзамен 2026',
           items: [
-            { text: 'Обзор 2026 года', link: '/2026/' },
-            { text: 'Модуль №1', link: '/2026/module1/' },
-            { text: 'Модуль №2', link: '/2026/module2/' },
-            { text: 'Модуль №3', link: '/2026/module3/' }
+            { text: 'Обзор заданий и стенда', link: '/2026/' }
           ]
-        }
-      ],
-      '/2026/module1/': [
+        },
         {
-          text: 'Модуль №1',
-          collapsed: false,
+          text: 'Модуль №1: Сетевая инфраструктура',
+          collapsed: true,
           items: [
             { text: 'Модуль №1 | Задание', link: '/2026/module1/' },
             { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module1/task-0' },
@@ -87,12 +81,10 @@ export default defineConfig({
             { text: 'Задание №10: Инфраструктура службы доменных имён (DNS BIND)', link: '/2026/module1/task-10' },
             { text: 'Задание №11: Настройка системного времени и часового пояса', link: '/2026/module1/task-11' }
           ]
-        }
-      ],
-      '/2026/module2/': [
+        },
         {
-          text: 'Модуль №2',
-          collapsed: false,
+          text: 'Модуль №2: Службы каталога и сервисы',
+          collapsed: true,
           items: [
             { text: 'Модуль №2 | Задание', link: '/2026/module2/' },
             { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module2/task-0' },
@@ -108,12 +100,10 @@ export default defineConfig({
             { text: 'Задание №10: Web-аутентификация в Nginx (.htpasswd)', link: '/2026/module2/task-10' },
             { text: 'Задание №11: Установка Яндекс Браузера на HQ-CLI', link: '/2026/module2/task-11' }
           ]
-        }
-      ],
-      '/2026/module3/': [
+        },
         {
-          text: 'Модуль №3',
-          collapsed: false,
+          text: 'Модуль №3: Безопасность и администрирование',
+          collapsed: true,
           items: [
             { text: 'Модуль №3 | Задание', link: '/2026/module3/' },
             { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module3/task-0' },
