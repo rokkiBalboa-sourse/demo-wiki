@@ -1,0 +1,8 @@
+services:
+  demo-wiki:
+    build: .
+    container_name: demo-wiki
+    restart: always
+    ports:
+      # Проброс на локальный порт 9495 хоста для Nginx
+      - "127.0.0.1:9495:80"
