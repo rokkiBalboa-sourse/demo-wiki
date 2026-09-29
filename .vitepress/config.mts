@@ -48,125 +48,85 @@ export default defineConfig({
         text: '2026',
         items: [
           { text: 'Обзор 2026 года', link: '/2026/' },
-          { text: 'Модуль 1', link: '/module1/' },
-          { text: 'Модуль 2', link: '/module2/' },
-          { text: 'Модуль 3', link: '/module3/' }
+          { text: 'Модуль 1', link: '/2026/module1/' },
+          { text: 'Модуль 2', link: '/2026/module2/' },
+          { text: 'Модуль 3', link: '/2026/module3/' }
         ]
       }
     ],
 
     sidebar: {
-      '/guide/': [
-        {
-          text: 'Введение',
-          collapsed: false,
-          items: [
-            { text: 'Быстрый старт', link: '/guide/getting-started' },
-            { text: 'Архитектура', link: '/guide/architecture' },
-            { text: 'Конфигурация', link: '/guide/configuration' }
-          ]
-        },
-        {
-          text: 'Руководства',
-          collapsed: false,
-          items: [
-            { text: 'Создание страниц', link: '/guide/markdown' },
-            { text: 'Компоненты и виджеты', link: '/guide/components' },
-            { text: 'Деплой сайта', link: '/guide/deployment' }
-          ]
-        }
-      ],
-      '/kb/': [
-        {
-          text: 'База знаний',
-          collapsed: false,
-          items: [
-            { text: 'Обзор статей', link: '/kb/overview' },
-            { text: 'Серверы и хостинг', link: '/kb/servers' },
-            { text: 'Безопасность', link: '/kb/security' },
-            { text: 'Оптимизация', link: '/kb/optimization' }
-          ]
-        }
-      ],
-      '/faq': [
-        {
-          text: 'Частые вопросы',
-          items: [
-            { text: 'Общие вопросы (FAQ)', link: '/faq' }
-          ]
-        }
-      ],
       '/2026/': [
         {
           text: 'Задания 2026 года',
           collapsed: false,
           items: [
             { text: 'Обзор 2026 года', link: '/2026/' },
-            { text: 'Модуль №1', link: '/module1/' },
-            { text: 'Модуль №2', link: '/module2/' },
-            { text: 'Модуль №3', link: '/module3/' }
+            { text: 'Модуль №1', link: '/2026/module1/' },
+            { text: 'Модуль №2', link: '/2026/module2/' },
+            { text: 'Модуль №3', link: '/2026/module3/' }
           ]
         }
       ],
-      '/module1/': [
+      '/2026/module1/': [
         {
           text: 'Модуль №1',
           collapsed: false,
           items: [
-            { text: 'Модуль №1 | Задание', link: '/module1/' },
-            { text: 'Задание №0: Настройка источников пакетов', link: '/module1/task-0' },
-            { text: 'Задание №1: Базовая настройка сети и хостов', link: '/module1/task-1' },
-            { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/module1/task-2' },
-            { text: 'Задание №3: Локальные учётные записи и sudo', link: '/module1/task-3' },
-            { text: 'Задание №4: Коммутация и сегментация VLAN в сегменте HQ', link: '/module1/task-4' },
-            { text: 'Задание №5: Безопасный удаленный доступ (SSH)', link: '/module1/task-5' },
-            { text: 'Задание №6: Межофисный защищенный IP-туннель (GRE)', link: '/module1/task-6' },
-            { text: 'Задание №7: Динамическая маршрутизация Link-State (OSPF в FRR)', link: '/module1/task-7' },
-            { text: 'Задание №8: Динамическая трансляция адресов (NAT) на филиалах', link: '/module1/task-8' },
-            { text: 'Задание №9: Настройка DHCP-сервера для клиентов (HQ-CLI)', link: '/module1/task-9' },
-            { text: 'Задание №10: Инфраструктура службы доменных имён (DNS BIND)', link: '/module1/task-10' },
-            { text: 'Задание №11: Настройка системного времени и часового пояса', link: '/module1/task-11' }
+            { text: 'Модуль №1 | Задание', link: '/2026/module1/' },
+            { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module1/task-0' },
+            { text: 'Задание №1: Базовая настройка сети и хостов', link: '/2026/module1/task-1' },
+            { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/2026/module1/task-2' },
+            { text: 'Задание №3: Локальные учётные записи и sudo', link: '/2026/module1/task-3' },
+            { text: 'Задание №4: Коммутация и сегментация VLAN в сегменте HQ', link: '/2026/module1/task-4' },
+            { text: 'Задание №5: Безопасный удаленный доступ (SSH)', link: '/2026/module1/task-5' },
+            { text: 'Задание №6: Межофисный защищенный IP-туннель (GRE)', link: '/2026/module1/task-6' },
+            { text: 'Задание №7: Динамическая маршрутизация Link-State (OSPF в FRR)', link: '/2026/module1/task-7' },
+            { text: 'Задание №8: Динамическая трансляция адресов (NAT) на филиалах', link: '/2026/module1/task-8' },
+            { text: 'Задание №9: Настройка DHCP-сервера для клиентов (HQ-CLI)', link: '/2026/module1/task-9' },
+            { text: 'Задание №10: Инфраструктура службы доменных имён (DNS BIND)', link: '/2026/module1/task-10' },
+            { text: 'Задание №11: Настройка системного времени и часового пояса', link: '/2026/module1/task-11' }
           ]
         }
       ],
-      '/module2/': [
+      '/2026/module2/': [
         {
           text: 'Модуль №2',
           collapsed: false,
           items: [
-            { text: 'Модуль №2 | Задание', link: '/module2/' },
-            { text: 'Задание №0: Настройка источников пакетов', link: '/module2/task-0' },
-            { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/module2/task-1' },
-            { text: 'Задание №2: Файловое хранилище RAID 0 на сервере HQ-SRV', link: '/module2/task-2' },
-            { text: 'Задание №3: Сетевая файловая система NFS на HQ-SRV и HQ-CLI', link: '/module2/task-3' },
-            { text: 'Задание №4: Служба сетевого времени Chrony на ISP', link: '/module2/task-4' },
-            { text: 'Задание №5: Автоматизация с Ansible на сервере BR-SRV', link: '/module2/task-5' },
-            { text: 'Задание №6: Веб-приложение в Docker на сервере BR-SRV', link: '/module2/task-6' },
-            { text: 'Задание №7: Веб-приложение Apache + MariaDB на сервере HQ-SRV', link: '/module2/task-7' },
-            { text: 'Задание №8: Статический проброс портов (DNAT) на роутерах', link: '/module2/task-8' },
-            { text: 'Задание №9: Обратный прокси-сервер Nginx на ISP', link: '/module2/task-9' },
-            { text: 'Задание №10: Web-аутентификация в Nginx (.htpasswd)', link: '/module2/task-10' },
-            { text: 'Задание №11: Установка Яндекс Браузера на HQ-CLI', link: '/module2/task-11' }
+            { text: 'Модуль №2 | Задание', link: '/2026/module2/' },
+            { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module2/task-0' },
+            { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/2026/module2/task-1' },
+            { text: 'Задание №2: Файловое хранилище RAID 0 на сервере HQ-SRV', link: '/2026/module2/task-2' },
+            { text: 'Задание №3: Сетевая файловая система NFS на HQ-SRV и HQ-CLI', link: '/2026/module2/task-3' },
+            { text: 'Задание №4: Служба сетевого времени Chrony на ISP', link: '/2026/module2/task-4' },
+            { text: 'Задание №5: Автоматизация с Ansible на сервере BR-SRV', link: '/2026/module2/task-5' },
+            { text: 'Задание №6: Веб-приложение в Docker на сервере BR-SRV', link: '/2026/module2/task-6' },
+            { text: 'Задание №7: Веб-приложение Apache + MariaDB на сервере HQ-SRV', link: '/2026/module2/task-7' },
+            { text: 'Задание №8: Статический проброс портов (DNAT) на роутерах', link: '/2026/module2/task-8' },
+            { text: 'Задание №9: Обратный прокси-сервер Nginx на ISP', link: '/2026/module2/task-9' },
+            { text: 'Задание №10: Web-аутентификация в Nginx (.htpasswd)', link: '/2026/module2/task-10' },
+            { text: 'Задание №11: Установка Яндекс Браузера на HQ-CLI', link: '/2026/module2/task-11' }
           ]
         }
       ],
-      '/module3/': [
+      '/2026/module3/': [
         {
           text: 'Модуль №3',
           collapsed: false,
           items: [
-            { text: 'Модуль №3 | Задание', link: '/module3/' },
-            { text: 'Задание №0: Настройка источников пакетов', link: '/module3/task-0' },
-            { text: 'Задание №1: Импорт пользователей в домен Samba DC', link: '/module3/task-1' },
-            { text: 'Задание №2: Центр сертификации ГОСТ и HTTPS Nginx', link: '/module3/task-2' },
-            { text: 'Задание №3: Защищённый IP-туннель и OSPF', link: '/module3/task-3' },
-            { text: 'Задание №4: Межсетевой экран nftables', link: '/module3/task-4' },
-            { text: 'Задание №5: Принт-сервер CUPS и PDF-принтер', link: '/module3/task-5' },
-            { text: 'Задание №6: Централизованное логирование rsyslog', link: '/module3/task-6' },
-            { text: 'Задание №7: Мониторинг устройств на HQ-SRV', link: '/module3/task-7' },
-            { text: 'Задание №8: Инвентаризация Ansible (PC-INFO)', link: '/module3/task-8' },
-            { text: 'Задание №9: Защита SSH с помощью Fail2ban', link: '/module3/task-9' },
-            { text: 'Задание №10: Резервное копирование данных', link: '/module3/task-10' }
+            { text: 'Модуль №3 | Задание', link: '/2026/module3/' },
+            { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module3/task-0' },
+            { text: 'Задание №1: Импорт пользователей в домен Samba DC', link: '/2026/module3/task-1' },
+            { text: 'Задание №2: Центр сертификации ГОСТ и HTTPS Nginx', link: '/2026/module3/task-2' },
+            { text: 'Задание №3: Защищённый IP-туннель и OSPF', link: '/2026/module3/task-3' },
+            { text: 'Задание №4: Межсетевой экран nftables', link: '/2026/module3/task-4' },
+            { text: 'Задание №5: Принт-сервер CUPS и PDF-принтер', link: '/2026/module3/task-5' },
+            { text: 'Задание №6: Централизованное логирование rsyslog', link: '/2026/module3/task-6' },
+            { text: 'Задание №7: Мониторинг устройств на HQ-SRV', link: '/2026/module3/task-7' },
+            { text: 'Задание №8: Инвентаризация Ansible (PC-INFO)', link: '/2026/module3/task-8' },
+            { text: 'Задание №9: Защита SSH с помощью Fail2ban', link: '/2026/module3/task-9' },
+            { text: 'Задание №10: Резервное копирование данных', link: '/2026/module3/task-10' }
           ]
         }
       ]
