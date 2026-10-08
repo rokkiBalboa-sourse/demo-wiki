@@ -5,6 +5,10 @@ description: "Пошаговая настройка динамической м�
 
 # Задание №7: Динамическая маршрутизация Link-State (OSPF в FRR)
 
+::: tip 📺 Видео-разбор задания
+Видео-разбор выполнения задания доступен по ссылке: [https://docker.sudostudy.dev/s/BTRAdw9Ewsczk7d](https://docker.sudostudy.dev/s/BTRAdw9Ewsczk7d)
+:::
+
 В данном задании настраивается автоматический обмен маршрутами между офисами **HQ** и **BR** с использованием протокола **OSPF (Open Shortest Path First)** на базе пакета **FRRouting (FRR)**.
 
 ---
