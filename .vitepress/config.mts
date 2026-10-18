@@ -13,6 +13,26 @@ export default defineConfig({
     ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap' }]
   ],
 
+  vite: {
+    plugins: [
+      {
+        name: 'admin-redirect',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            const url = req.url ? req.url.split('?')[0] : '';
+            if (url === '/admin' || url === '/admin/') {
+              const query = req.url && req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+              res.writeHead(302, { Location: '/admin/index.html' + query });
+              res.end();
+              return;
+            }
+            next();
+          });
+        }
+      }
+    ]
+  },
+
   themeConfig: {
     siteTitle: 'demo-wiki',
     logo: '/logo.png',
