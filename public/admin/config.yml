@@ -10,9 +10,9 @@ media_folder: 'public/images'
 public_folder: '/images'
 
 collections:
-  - name: 'guide'
-    label: 'Документация (Guide)'
-    folder: 'guide'
+  - name: 'module1_2026'
+    label: '2026: Модуль 1'
+    folder: '2026/module1'
     create: true
     slug: '{{slug}}'
     extension: 'md'
@@ -20,11 +20,12 @@ collections:
     summary: '{{title}}'
     fields:
       - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+      - { label: 'Описание', name: 'description', widget: 'string', required: false }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
-  - name: 'kb'
-    label: 'База знаний (KB)'
-    folder: 'kb'
+  - name: 'module2_2026'
+    label: '2026: Модуль 2'
+    folder: '2026/module2'
     create: true
     slug: '{{slug}}'
     extension: 'md'
@@ -32,11 +33,12 @@ collections:
     summary: '{{title}}'
     fields:
       - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+      - { label: 'Описание', name: 'description', widget: 'string', required: false }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
-  - name: 'module1'
-    label: 'Модуль 1 | 2026'
-    folder: 'module1'
+  - name: 'module3_2026'
+    label: '2026: Модуль 3'
+    folder: '2026/module3'
     create: true
     slug: '{{slug}}'
     extension: 'md'
@@ -44,11 +46,12 @@ collections:
     summary: '{{title}}'
     fields:
       - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+      - { label: 'Описание', name: 'description', widget: 'string', required: false }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
-  - name: 'module2'
-    label: 'Модуль 2 | 2026'
-    folder: 'module2'
+  - name: 'module1_2027'
+    label: '2027: Модуль 1'
+    folder: '2027/module1'
     create: true
     slug: '{{slug}}'
     extension: 'md'
@@ -56,6 +59,7 @@ collections:
     summary: '{{title}}'
     fields:
       - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+      - { label: 'Описание', name: 'description', widget: 'string', required: false }
       - { label: 'Содержимое', name: 'body', widget: 'markdown' }
 
   - name: 'pages'
@@ -67,9 +71,15 @@ collections:
         fields:
           - { label: 'Макет', name: 'layout', widget: 'hidden', default: 'home' }
           - { label: 'Содержимое', name: 'body', widget: 'markdown', required: false }
-      - label: 'FAQ (faq.md)'
-        name: 'faq'
-        file: 'faq.md'
+      - label: '2026: Обзор (2026/index.md)'
+        name: 'index_2026'
+        file: '2026/index.md'
         fields:
-          - { label: 'Заголовок', name: 'title', widget: 'string', required: false }
+          - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
+          - { label: 'Содержимое', name: 'body', widget: 'markdown' }
+      - label: '2027: Обзор (2027/index.md)'
+        name: 'index_2027'
+        file: '2027/index.md'
+        fields:
+          - { label: 'Заголовок', name: 'title', widget: 'string', required: true }
           - { label: 'Содержимое', name: 'body', widget: 'markdown' }

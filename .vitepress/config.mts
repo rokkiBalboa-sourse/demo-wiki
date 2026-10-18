@@ -13,26 +13,6 @@ export default defineConfig({
     ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap' }]
   ],
 
-  vite: {
-    plugins: [
-      {
-        name: 'admin-redirect',
-        configureServer(server) {
-          server.middlewares.use((req, res, next) => {
-            const url = req.url ? req.url.split('?')[0] : '';
-            if (url === '/admin' || url === '/admin/') {
-              const query = req.url && req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
-              res.writeHead(302, { Location: '/admin/index.html' + query });
-              res.end();
-              return;
-            }
-            next();
-          });
-        }
-      }
-    ]
-  },
-
   themeConfig: {
     siteTitle: 'demo-wiki',
     logo: '/logo.png',
@@ -71,6 +51,13 @@ export default defineConfig({
           { text: '🌐 Модуль №1: Сетевая инфраструктура', link: '/2026/module1/' },
           { text: '🏢 Модуль №2: Службы каталога и сервисы', link: '/2026/module2/' },
           { text: '🔒 Модуль №3: Безопасность и администрирование', link: '/2026/module3/' }
+        ]
+      },
+      {
+        text: '2027',
+        items: [
+          { text: '📋 Обзор 2027 года', link: '/2027/' },
+          { text: '🌐 Модуль №1', link: '/2027/module1/' }
         ]
       }
     ],
@@ -137,6 +124,21 @@ export default defineConfig({
             { text: 'Задание №8: Инвентаризация Ansible (PC-INFO)', link: '/2026/module3/task-8' },
             { text: 'Задание №9: Защита SSH с помощью Fail2ban', link: '/2026/module3/task-9' },
             { text: 'Задание №10: Резервное копирование данных', link: '/2026/module3/task-10' }
+          ]
+        }
+      ],
+      '/2027/': [
+        {
+          text: '📋 Демоэкзамен 2027',
+          items: [
+            { text: 'Обзор заданий и стенда', link: '/2027/' }
+          ]
+        },
+        {
+          text: 'Модуль №1',
+          collapsed: false,
+          items: [
+            { text: 'Модуль №1 | Задание', link: '/2027/module1/' }
           ]
         }
       ]

@@ -12,4 +12,7 @@ hero:
     - theme: brand
       text: "2026"
       link: /2026/
+    - theme: alt
+      text: "2027"
+      link: /2027/
 ---
