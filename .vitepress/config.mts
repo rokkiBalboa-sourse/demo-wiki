@@ -139,7 +139,8 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Модуль №1 | Задание', link: '/2027/module1/' },
-            { text: 'Задание №1: Базовая настройка сети и хостов', link: '/2027/module1/task-1' }
+            { text: 'Задание №1: Базовая настройка сети и хостов', link: '/2027/module1/task-1' },
+            { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/2027/module1/task-2' }
           ]
         }
       ]
