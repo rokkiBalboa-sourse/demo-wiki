@@ -3,7 +3,7 @@ title: "Задание №8: Динамическая трансляция ад�
 description: "Пошаговая настройка NAT Masquerade через nftables на маршрутизаторах HQ-RTR и BR-RTR для выхода серверов и клиентов в сеть Интернет через провайдера ISP"
 ---
 
-# Задание №8: Динамическая трансляция адресов (NAT) на филиалах (2027)
+# Задание №8: Динамическая трансляция адресов (NAT) на филиалах
 
 ::: tip 📺 Видео-разбор задания
 *В процессе разработки*
@@ -28,9 +28,12 @@ description: "Пошаговая настройка NAT Masquerade через nf
 apt-get update && apt-get install nftables nano -y
 ```
 
-### 2. Создаем конфигурационный файл правил `/etc/nftables/nftables.nft`:
+### 2. Создаем конфигурационный файл правил:
 ```bash
-cat << 'EOF' > /etc/nftables/nftables.nft
+nano /etc/nftables/nftables.nft
+```
+Удаляем старую конфигурацию и прописывем новую:
+```bash
 #!/usr/sbin/nft -f
 flush ruleset
 
@@ -40,8 +43,16 @@ table ip nat {
         oifname "ens18" masquerade
     }
 }
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
+
 
 ::: tip 💡 Что делает это правило?
 * **`oifname "ens18"`** — отслеживает пакеты, покидающие маршрутизатор через внешний сетевой адаптер `ens18` в сторону провайдера ISP.
@@ -69,7 +80,10 @@ apt-get update && apt-get install nftables nano -y
 
 ### 2. Записываем конфигурацию NAT:
 ```bash
-cat << 'EOF' > /etc/nftables/nftables.nft
+nano /etc/nftables/nftables.nft
+```
+Удаляем старую конфигурацию и прописывем новую:
+```bash
 #!/usr/sbin/nft -f
 flush ruleset
 
@@ -79,8 +93,16 @@ table ip nat {
         oifname "ens18" masquerade
     }
 }
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
+
 
 ### 3. Запускаем сервис:
 ```bash

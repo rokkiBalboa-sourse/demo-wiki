@@ -3,7 +3,7 @@ title: "Задание №7: Динамическая маршрутизация
 description: "Пошаговая настройка динамической маршрутизации OSPF в FRRouting (FRR) на маршрутизаторах HQ-RTR, BR-RTR и межсетевом экране BR-FW с аутентификацией MD5 и пассивными интерфейсами"
 ---
 
-# Задание №7: Динамическая маршрутизация Link-State (OSPF в FRR) (2027)
+# Задание №7: Динамическая маршрутизация Link-State (OSPF в FRR)
 
 ::: tip 📺 Видео-разбор задания
 *В процессе разработки*
@@ -44,9 +44,14 @@ apt-get update && apt-get install frr -y
 sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons ; grep ospf /etc/frr/daemons
 ```
 
-### 2. Записываем конфигурацию FRR:
+### 2. Записываем конфигурацию FRR в файл:
+Открываем файл конфигурации frr:
 ```bash
-cat << 'EOF' > /etc/frr/frr.conf
+nano /etc/frr/frr.conf
+```
+Удаляем старую конфигурацию и вставляем новую:
+
+```bash
 frr version 10.2.2
 frr defaults traditional
 hostname hq-rtr.au-team.irpo
@@ -67,8 +72,15 @@ router ospf
  network 192.168.200.0/28 area 0
 exit
 !
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 
 ### 3. Запускаем службу FRR и перезапускаем сеть:
 ```bash
@@ -93,8 +105,13 @@ sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons ; grep ospf /etc/frr/daemons
 
 ### 2. Записываем конфигурацию FRR:
 Здесь анонсируется туннель `gre1` (с аутентификацией MD5) и внутренний линк `ens19` к `BR-FW`:
+Открываем файл конфигурации frr:
 ```bash
-cat << 'EOF' > /etc/frr/frr.conf
+nano /etc/frr/frr.conf
+```
+Удаляем старую конфигурацию и вставляем новую:
+
+```bash
 frr version 10.2.2
 frr defaults traditional
 hostname br-rtr.au-team.irpo
@@ -117,8 +134,15 @@ router ospf
  network 172.16.10.0/30 area 0
 exit
 !
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 
 ### 3. Запускаем службу:
 ```bash
@@ -144,8 +168,13 @@ sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons ; grep ospf /etc/frr/daemons
 
 ### 2. Записываем конфигурацию FRR:
 На BR-FW активным в OSPF является только входной интерфейс `ens18` в сторону `BR-RTR`. Также анонсируется подсеть сервера `172.16.20.0/28`:
+
+Открываем файл конфигурации frr:
 ```bash
-cat << 'EOF' > /etc/frr/frr.conf
+nano /etc/frr/frr.conf
+```
+Удаляем старую конфигурацию и вставляем новую:
+```bash
 frr version 10.2.2
 frr defaults traditional
 hostname br-fw.au-team.irpo
@@ -162,8 +191,15 @@ router ospf
  network 172.16.20.0/28 area 0
 exit
 !
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 
 ### 3. Запускаем службу:
 ```bash

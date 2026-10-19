@@ -57,7 +57,7 @@ export default defineConfig({
         text: '2027',
         items: [
           { text: '📋 Обзор 2027 года', link: '/2027/' },
-          { text: '🌐 Модуль №1', link: '/2027/module1/' }
+          { text: '🌐 Модуль №1: Сетевая инфраструктура', link: '/2027/module1/' }
         ]
       }
     ],
@@ -74,7 +74,7 @@ export default defineConfig({
           text: 'Модуль №1: Сетевая инфраструктура',
           collapsed: true,
           items: [
-            { text: 'Модуль №1 | Задание', link: '/2026/module1/' },
+            { text: 'Модуль №1 | Задача', link: '/2026/module1/' },
             { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module1/task-0' },
             { text: 'Задание №1: Базовая настройка сети и хостов', link: '/2026/module1/task-1' },
             { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/2026/module1/task-2' },
@@ -93,7 +93,7 @@ export default defineConfig({
           text: 'Модуль №2: Службы каталога и сервисы',
           collapsed: true,
           items: [
-            { text: 'Модуль №2 | Задание', link: '/2026/module2/' },
+            { text: 'Модуль №2 | Задача', link: '/2026/module2/' },
             { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module2/task-0' },
             { text: 'Задание №1: Контроллер домена Samba DC и ввод клиента HQ-CLI', link: '/2026/module2/task-1' },
             { text: 'Задание №2: Файловое хранилище RAID 0 на сервере HQ-SRV', link: '/2026/module2/task-2' },
@@ -112,7 +112,7 @@ export default defineConfig({
           text: 'Модуль №3: Безопасность и администрирование',
           collapsed: true,
           items: [
-            { text: 'Модуль №3 | Задание', link: '/2026/module3/' },
+            { text: 'Модуль №3 | Задача', link: '/2026/module3/' },
             { text: 'Задание №0: Настройка источников пакетов', link: '/2026/module3/task-0' },
             { text: 'Задание №1: Импорт пользователей в домен Samba DC', link: '/2026/module3/task-1' },
             { text: 'Задание №2: Центр сертификации ГОСТ и HTTPS Nginx', link: '/2026/module3/task-2' },
@@ -135,10 +135,10 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Модуль №1',
+          text: 'Модуль №1: Сетевая инфраструктура',
           collapsed: false,
           items: [
-            { text: 'Модуль №1 | Задание', link: '/2027/module1/' },
+            { text: 'Задача', link: '/2027/module1/' },
             { text: 'Задание №1: Базовая настройка сети и хостов', link: '/2027/module1/task-1' },
             { text: 'Задание №2: Доступ к сети Интернет на ISP', link: '/2027/module1/task-2' },
             { text: 'Задание №3: Локальные учётные записи и sudo', link: '/2027/module1/task-3' },

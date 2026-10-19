@@ -3,7 +3,7 @@ title: "Задание №9: Настройка DHCP-сервера для кл�
 description: "Пошаговое руководство по развертыванию dhcp-server (ISC DHCP) на маршрутизаторе HQ-RTR для выдачи адресов клиентам VLAN 200 (HQ-CLI)"
 ---
 
-# Задание №9: Настройка DHCP-сервера для клиентов (HQ-CLI) (2027)
+# Задание №9: Настройка DHCP-сервера для клиентов (HQ-CLI)
 
 ::: tip 📺 Видео-разбор задания
 *В процессе разработки*
@@ -26,11 +26,13 @@ description: "Пошаговое руководство по развертыв�
 apt-get update && apt-get install dhcp-server -y
 ```
 
-### 2. Конфигурируем файл `/etc/dhcp/dhcpd.conf`:
+### 2. Конфигурируем файл `dhcpd.conf`:
 Полностью заменяем содержимое конфигурационного файла пулом подсети VLAN 200:
+```bash
+nano /etc/dhcp/dhcpd.conf
+```
 
 ```bash
-cat << 'EOF' > /etc/dhcp/dhcpd.conf
 subnet 192.168.200.0 netmask 255.255.255.240 {
   range 192.168.200.2 192.168.200.14;
   option domain-name-servers 192.168.100.2;
@@ -39,8 +41,15 @@ subnet 192.168.200.0 netmask 255.255.255.240 {
   default-lease-time 600;
   max-lease-time 7200;
 }
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 
 ![Конфигурационный файл dhcpd.conf](/images/2027/m1-t9-dhcpd-conf.png)
 

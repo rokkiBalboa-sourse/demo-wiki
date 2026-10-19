@@ -3,7 +3,7 @@ title: "Задание №10: Инфраструктура службы доме
 description: "Пошаговая настройка DNS-сервера BIND 9 на сервере HQ-SRV: прямая зона au-team.irpo, обратные зоны PTR для сетей офисов и серверы пересылки"
 ---
 
-# Задание №10: Инфраструктура службы доменных имён (BIND) (2027)
+# Задание №10: Инфраструктура службы доменных имён (BIND)
 
 ::: tip 📺 Видео-разбор задания
 *В процессе разработки*
@@ -41,7 +41,6 @@ nano /etc/bind/options.conf
 
 Полностью очищаем файл и записываем следующую конфигурацию:
 ```bash
-cat << 'EOF' > /etc/bind/options.conf
 options {
     listen-on port 53 { 127.0.0.1; 192.168.100.2; };
     listen-on-v6 port 53 { none; };
@@ -74,8 +73,15 @@ zone "20.16.172.in-addr.arpa" {
     type master;
     file "au-team_rev2.db";
 };
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 
 #### 🔍 Разбор ключевых параметров:
 * **`listen-on port 53 { 127.0.0.1; 192.168.100.2; };`** — интерфейсы, на которых демон принимает DNS-запросы.
@@ -91,7 +97,10 @@ EOF
 
 Создаём файл описания зоны `/etc/bind/zone/au-team.irpo`:
 ```bash
-cat << 'EOF' > /etc/bind/zone/au-team.irpo
+nano /etc/bind/zone/au-team.irpo
+```
+
+```bash
 $TTL 1D
 @       IN      SOA     au-team.irpo.  root.au-team.irpo. (
                                         0       ; serial
@@ -112,8 +121,15 @@ br-fw   IN      A       172.16.10.2
 br-srv  IN      A       172.16.20.2
 docker  IN      A       172.16.1.1
 web     IN      A       172.16.2.1
-EOF
 ```
+
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 
 ::: warning ⚠️ Обратите внимание на точки в конце имён!
 В файлах зон BIND точка в конце имени (например, `au-team.irpo.`) означает абсолютное доменное имя (FQDN). Если не поставить точку, BIND автоматически добавит к записи имя текущей зоны, что приведёт к ошибке конфигурации.
@@ -125,7 +141,9 @@ EOF
 
 Создаём файл обратной зоны для узлов главного офиса:
 ```bash
-cat << 'EOF' > /etc/bind/zone/au-team_rev1.db
+nano /etc/bind/zone/au-team_rev1.db
+```
+```bash
 $TTL 1D
 @       IN      SOA     au-team.irpo. root.au-team.irpo. (
                                         0       ; serial
@@ -135,16 +153,23 @@ $TTL 1D
                                         3H )    ; minimum
         IN      NS      au-team.irpo.
 2       IN      PTR     hq-srv.au-team.irpo.
-EOF
 ```
-
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 ---
 
 ## Шаг 5. Настройка файла обратной зоны филиала (20.16.172.in-addr.arpa)
 
 Создаём файл обратной зоны для узлов филиала:
 ```bash
-cat << 'EOF' > /etc/bind/zone/au-team_rev2.db
+nano /etc/bind/zone/au-team_rev2.db
+```
+```bash
 $TTL 1D
 @       IN      SOA     au-team.irpo. root.au-team.irpo. (
                                         0       ; serial
@@ -154,9 +179,14 @@ $TTL 1D
                                         3H )    ; minimum
         IN      NS      au-team.irpo.
 2       IN      PTR     br-srv.au-team.irpo.
-EOF
 ```
-
+::: tip 💡 Памятка по работе в Nano
+* **Сохранить файл:** нажмите комбинацию <kbd>Ctrl</kbd> + <kbd>O</kbd>, затем подтвердите имя файла клавишей <kbd>Enter</kbd>.
+* **Выйти из редактора:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> (при наличии несохранённых изменений нажмите <kbd>Y</kbd> для сохранения или <kbd>N</kbd> для отмены).
+* **Быстро сохранить и выйти:** нажмите <kbd>Ctrl</kbd> + <kbd>X</kbd> → затем <kbd>Y</kbd> → затем <kbd>Enter</kbd>.
+* **Поиск по файлу:** нажмите <kbd>Ctrl</kbd> + <kbd>W</kbd>, введите искомое слово и нажмите <kbd>Enter</kbd>.
+* **Вырезать строку:** <kbd>Ctrl</kbd> + <kbd>K</kbd>, **вставить строку:** <kbd>Ctrl</kbd> + <kbd>U</kbd>.
+:::
 ---
 
 ## Шаг 6. Назначение прав и запуск службы BIND

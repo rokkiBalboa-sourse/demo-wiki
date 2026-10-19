@@ -9,10 +9,10 @@ hero:
     src: /logo.png
     alt: demo-wiki Logo
   actions:
-    - theme: brand
+    - theme: alt
       text: "2026"
       link: /2026/
-    - theme: alt
+    - theme: brand
       text: "2027"
       link: /2027/
 ---
