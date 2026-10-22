@@ -157,7 +157,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Задача', link: '/2027/module2/' },
-            { text: 'Задание №1: Контроллер домена Samba DC', link: '/2027/module2/task-1' }
+            { text: 'Задание №1: Контроллер домена Samba DC', link: '/2027/module2/task-1' },
+            { text: 'Задание №2: Файловое хранилище RAID 0', link: '/2027/module2/task-2' },
+            { text: 'Задание №3: Сетевая файловая система (NFS)', link: '/2027/module2/task-3' }
           ]
         }
       ]
