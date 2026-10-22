@@ -9,7 +9,7 @@ hero:
     src: /logo.png
     alt: demo-wiki Logo
   actions:
-    - theme: alt
+    - theme: sponsor
       text: "2026"
       link: /2026/
     - theme: brand

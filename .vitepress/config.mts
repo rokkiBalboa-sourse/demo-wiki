@@ -151,6 +151,14 @@ export default defineConfig({
             { text: 'Задание №10: Инфраструктура службы доменных имён (BIND)', link: '/2027/module1/task-10' },
             { text: 'Задание №11: Настройка системного времени и часового пояса', link: '/2027/module1/task-11' }
           ]
+        },
+        {
+          text: 'Модуль №2: Службы каталога и сервисы',
+          collapsed: false,
+          items: [
+            { text: 'Задача', link: '/2027/module2/' },
+            { text: 'Задание №1: Контроллер домена Samba DC', link: '/2027/module2/task-1' }
+          ]
         }
       ]
     },
